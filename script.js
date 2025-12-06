@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", e => {
 
     if (document.body.classList.contains("index")) {
 
-        let botonIniciarSesionIndex = document.getElementById("btnIniciarSesionIndex");
-        let botonCrearCuentaIndex = document.getElementById("btnCrearCuentaIndex");
+        let botonIniciarSesionIndex = document.getElementById("btn-iniciarsesion-index");
+        let botonCrearCuentaIndex = document.getElementById("btn-crearcuenta-index");
 
         document.addEventListener("click", e => {
 
@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", e => {
         document.addEventListener("click", e => {
             if (e.target === botonEntrarPrincipal) {
                 window.location.href = "principal.html";
-                mostrarPanel(panelHogar);
             }
         });
     }
@@ -66,7 +65,7 @@ document.addEventListener("DOMContentLoaded", e => {
             if (e.target.closest("#boton-hogar")) {
                 mostrarPanel(panelHogar);
 
-                imgHo.src = "imgs/iconotindercolor.png";
+                imgHogar.src = "imgs/iconotindercolor.png";
                 imgMatches.src = "imgs/iconomatches.png";
                 imgPerfil.src = "imgs/iconoperfil.png";
             }
@@ -291,17 +290,6 @@ document.addEventListener("DOMContentLoaded", e => {
                 }, 50);
             });
         }
-
-        function mostrarPanel(panel) {
-            panelHogar.classList.add("oculto");
-            panelMatches.classList.add("oculto");
-            panelPerfil.classList.add("oculto");
-
-            panel.classList.remove("oculto");
-        }
     };
-
-
-
 });
 
