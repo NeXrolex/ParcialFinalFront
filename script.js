@@ -160,6 +160,10 @@ document.addEventListener("DOMContentLoaded", e => {
         let cardTop = document.querySelector(".card-top");
         let cardNext = document.querySelector(".card-next");
 
+        let btnLike = document.getElementById("btn-like");
+        let btnDislike = document.getElementById("btn-dislike");
+        let btnSuperLike = document.getElementById("btn-superlike");
+
         let buscadorPlaceholder = document.getElementById("buscar-matches")
 
         let matches = "x";
@@ -223,7 +227,36 @@ document.addEventListener("DOMContentLoaded", e => {
                 imgMatches.src = "imgs/iconomatches.png";
                 imgPerfil.src = "imgs/iconoperfilcolor.png";
             }
+
+            if (e.target.closest("#btn-like")) {
+                moverTarjeta(1);
+            }
+            if (e.target.closest("#btn-dislike")) {
+                moverTarjeta(-1);
+            }
         });
+
+
+        function moverTarjeta(direccion) {
+            const cardTop = document.querySelector(".card-top");
+            if (!cardTop) return;
+
+            cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
+            cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
+
+            setTimeout(() => {
+                cardTop.remove();
+                promoverTarjetas();
+                agregarNuevaTarjeta();
+            }, 420);
+
+            // animar siguiente tarjeta
+            const next = document.querySelector(".card-next");
+            if (next) {
+                next.style.transition = "transform .3s ease";
+                next.style.transform = "scale(0.92) translateY(25px)";
+            }
+        }
 
 
         // ========= CONFIG ==========
