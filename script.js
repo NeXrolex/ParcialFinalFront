@@ -149,6 +149,11 @@ document.addEventListener("DOMContentLoaded", e => {
         let cardTop = document.querySelector(".card-top");
         let cardNext = document.querySelector(".card-next");
 
+        let buscadorPlaceholder = document.getElementById("buscar-matches")
+
+        let matches = "x";
+        buscadorPlaceholder.placeholder = `Buscar ${matches} matches`;
+
 
         function mostrarPanel(panel) {
             panelHogar.classList.add("oculto");
@@ -158,9 +163,7 @@ document.addEventListener("DOMContentLoaded", e => {
             panel.classList.remove("oculto");
         }
 
-        let matches = "{x}";
 
-        document.getElementById("buscar-matches").placeholder = `Buscar ${matches} matches`;
 
         document.addEventListener("click", e => {
 

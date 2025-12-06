@@ -10,28 +10,49 @@
     <body class="principal">
         <header class="headerPrincipal">
             <h1>
-                <img src="imgs/iconotindercolor.png" alt="icono de tinder">
+                <img src="imgs/iconoapp.png" alt="icono de tinder">
                 tinder
             </h1>
         </header>
-        <div class="contenedorSwipe">
-            <div class="tarjeta card-top"></div>
-            <div class="tarjeta card-next"></div>
+        <div class="hogar">
+            <div class="contenedorSwipe">
+                <div class="tarjeta card-top"></div>
+                <div class="tarjeta card-next"></div>
+            </div>
+            <div class="contenedorBotonesSwap">
+                <button class="botonesMatch">
+                    <img src="imgs/xroja.png" alt="icono de perfil">
+                    <br>
+                </button>
+                <button id="superlike" class="botonesMatch">
+                    <img src="imgs/estrella.png" alt="icono de perfil">
+                    <br>
+                </button>
+                <button class="botonesMatch">
+                    <img src="imgs/corazonverde.png" alt="icono de perfil">
+                    <br>
+                </button>
+            </div>
         </div>
-        <div class="contenedorBotonesSwap">
-            <button class="botonesMatch">
-                <img src="imgs/xroja.png" alt="icono de perfil">
-                <br>
-            </button>
-            <button id="superlike" class="botonesMatch">
-                <img src="imgs/estrella.png" alt="icono de perfil">
-                <br>
-            </button>
-            <button class="botonesMatch">
-                <img src="imgs/corazonverde.png" alt="icono de perfil">
-                <br>
-            </button>
+        <div class="matches oculto">
+            <div id="buscador">
+                <img src="imgs/lupa.png" alt="icono de lupa">
+                <input type="search" id="buscar-matches" placeholder="">
+            </div>
+            <div class="panelLikeMatch">
+                <p>Tus conexiones.</p>
+                <div id="likes">
+                    <div class="perfilesLike" id="div-likes"></div>
+                    <div class="perfilesLike" id="div-matches"></div>
+                    <div class="perfilesLike" id="div-matches"></div>
+                </div>
+                <p>Personas a las que le has gustado.</p>
+                <div id="matches">
+                    <div class="perfilesLike" id="div-matches"></div>
+                </div>
+            </div>
         </div>
+        <div class="perfil oculto"></div>
         <footer class="footerPrincipal">
             <div class="contenedorBotonesFooter">
                 <button class="botonesPrincipal" id="boton-hogar">
