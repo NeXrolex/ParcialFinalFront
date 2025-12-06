@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", e => {
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
-                const respuesta = await fetch(`http://localhost:8080/api/usuario/correoLogin/${correoLogin}`);
+                const respuesta = await fetch(`http://localhost:8080/api/usuario/correo/${correoLogin}`);
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
