@@ -18,17 +18,119 @@ document.addEventListener("DOMContentLoaded", e => {
     };
 
     if (document.body.classList.contains("login")) {
-        let botonEntrarPrincipal = document.getElementById("botonEntrarPrincipal");
+        let botonEntrarPrincipal = document.getElementById("boton-entrar-principal");
         document.addEventListener("click", e => {
             if (e.target === botonEntrarPrincipal) {
-                window.location.href = "principal.html";
+                e.preventDefault();
+                validarLogin();
             }
         });
+
+        async function validarLogin() {
+            const correoLogin = document.getElementById("correo-login").value;
+            const passwordLogin = document.getElementById("password-login").value;
+
+            try {
+                const respuesta = await fetch(`http://localhost:8080/api/usuario/correoLogin/${correoLogin}`);
+
+                if (!respuesta.ok) {
+                    alert("Usuario no encontrado");
+                    return;
+                }
+
+                // Verifica si la respuesta tiene contenido antes del JSON
+                const texto = await respuesta.text();
+
+                if (!texto) {
+                    alert("Usuario no encontrado");
+                    return;
+                }
+
+                const usuario = JSON.parse(texto);
+
+                // Validar clave
+                if (usuario.password === passwordLogin) {
+                    alert("Login correcto");
+                    window.location.href = "principal.html";
+                } else {
+                    alert("Contraseña incorrecta");
+                }
+
+            } catch (error) {
+                console.error("Error en login:", error);
+                alert("Error conectando al servidor");
+            }
+        }
+
+
     }
 
     if (document.body.classList.contains("registro")) {
 
+        const botonRegistro = document.getElementById("boton-enviar-registro");
+
+        botonRegistro.addEventListener("click", e => {
+            e.preventDefault();
+            validarRegistro();
+        });
+
+        async function validarRegistro() {
+
+            // recoger los datos sin espacios
+            const nombre = document.getElementById("nombre-registro").value.trim();
+            const apellido = document.getElementById("apellido-registro").value.trim();
+            const correo = document.getElementById("correo-registro").value.trim();
+            const password = document.getElementById("password-registro").value.trim();
+            const fechaNacimiento = document.getElementById("edad-registro").value;
+            const generoInteres = document.getElementById("genero-registro").value;
+
+            // validación de campos para evitar que estén vacios
+            if (!nombre || !apellido || !correo || !password) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            // se recibe el json con todos los datos, incluso los que no necesitemos
+            const usuario = {
+                nombre,
+                apellido,
+                correo,
+                password,
+                ciudad: "Bogotá",
+                fechaNacimiento,
+                generoInteres,
+                edadMin: 18,
+                edadMax: 99,
+                distanciaMax: "50"
+            };
+
+            console.log("Enviando:", usuario);
+
+            try {
+                const response = await fetch("http://localhost:8080/api/usuario", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(usuario)
+                });
+
+                if (!response.ok) {
+                    alert("Error al crear usuario");
+                    return;
+                }
+
+                const data = await response.json();
+                console.log("Usuario creado:", data);
+
+                alert("Usuario registrado correctamente");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error("Error en el registro:", error);
+                alert("Error conectando al servidor");
+            }
+        }
     }
+
 
     if (document.body.classList.contains("principal")) {
 
