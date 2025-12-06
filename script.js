@@ -17,6 +17,79 @@ document.addEventListener("DOMContentLoaded", e => {
         });
     };
 
+    if (document.body.classList.contains("registro")) {
+
+        const botonRegistro = document.getElementById("boton-enviar-registro");
+
+        botonRegistro.addEventListener("click", e => {
+            e.preventDefault();
+            validarRegistro();
+        });
+
+        function primeraLetraMayuscula(texto) {
+            if (!texto) return "";
+            console.log("Texto antes:", texto);
+            const resultado = texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
+            console.log("Texto después:", resultado);
+            return resultado;
+        }
+
+        async function validarRegistro() {
+
+            // recoger los datos sin espacios
+            const nombre = primeraLetraMayuscula(document.getElementById("nombre-registro").value.trim());
+            const apellido = primeraLetraMayuscula(document.getElementById("apellido-registro").value.trim());
+            const correo = document.getElementById("correo-registro").value.trim();
+            const password = document.getElementById("password-registro").value.trim();
+            const fechaNacimiento = document.getElementById("edad-registro").value;
+            const generoUsuario = document.getElementById("genero-registro").value;
+
+            // validación de campos para evitar que estén vacios
+            if (!nombre || !apellido || !correo || !password) {
+                alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            // se recibe el json con todos los datos, incluso los que no necesitemos
+            const usuario = {
+                nombre,
+                apellido,
+                correo,
+                password,
+                fechaNacimiento,
+                generoUsuario,
+            };
+
+            console.log("Enviando:", usuario);
+
+            try {
+                const response = await fetch("http://localhost:8080/api/usuario", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(usuario)
+                });
+
+                if (!response.ok) {
+                    alert("Error al crear usuario");
+                    return;
+                }
+
+                const data = await response.json();
+                localStorage.setItem("nombre", data.nombre);
+                localStorage.setItem("apellido", data.apellido);
+                localStorage.setItem("correo", data.correo);
+                localStorage.setItem("password", data.password);
+                localStorage.setItem("fechaNacimiento", data.fechaNacimiento);
+                localStorage.setItem("generoUsuario", data.generoUsuario);
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error("Error en el registro:", error);
+            }
+        }
+    }
+
+
     if (document.body.classList.contains("login")) {
         let botonEntrarPrincipal = document.getElementById("boton-entrar-principal");
         document.addEventListener("click", e => {
@@ -47,10 +120,13 @@ document.addEventListener("DOMContentLoaded", e => {
                 }
 
                 const usuario = JSON.parse(texto);
+                console.log(usuario);
 
                 // Validar clave
                 if (usuario.password === passwordLogin) {
-                    alert("Login correcto");
+                    localStorage.setItem("nombre", usuario.nombre);
+                    localStorage.setItem("correo", usuario.correo);
+                    localStorage.setItem("fechaNacimiento", usuario.fechaNacimiento);
                     window.location.href = "principal.html";
                 } else {
                     alert("Contraseña incorrecta");
@@ -65,74 +141,9 @@ document.addEventListener("DOMContentLoaded", e => {
 
     }
 
-    if (document.body.classList.contains("registro")) {
-
-        const botonRegistro = document.getElementById("boton-enviar-registro");
-
-        botonRegistro.addEventListener("click", e => {
-            e.preventDefault();
-            validarRegistro();
-        });
-
-        async function validarRegistro() {
-
-            // recoger los datos sin espacios
-            const nombre = document.getElementById("nombre-registro").value.trim();
-            const apellido = document.getElementById("apellido-registro").value.trim();
-            const correo = document.getElementById("correo-registro").value.trim();
-            const password = document.getElementById("password-registro").value.trim();
-            const fechaNacimiento = document.getElementById("edad-registro").value;
-            const generoInteres = document.getElementById("genero-registro").value;
-
-            // validación de campos para evitar que estén vacios
-            if (!nombre || !apellido || !correo || !password) {
-                alert("Por favor completa todos los campos.");
-                return;
-            }
-
-            // se recibe el json con todos los datos, incluso los que no necesitemos
-            const usuario = {
-                nombre,
-                apellido,
-                correo,
-                password,
-                ciudad: "Bogotá",
-                fechaNacimiento,
-                generoInteres,
-                edadMin: 18,
-                edadMax: 99,
-                distanciaMax: "50"
-            };
-
-            console.log("Enviando:", usuario);
-
-            try {
-                const response = await fetch("http://localhost:8080/api/usuario", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(usuario)
-                });
-
-                if (!response.ok) {
-                    alert("Error al crear usuario");
-                    return;
-                }
-
-                const data = await response.json();
-                console.log("Usuario creado:", data);
-
-                alert("Usuario registrado correctamente");
-                window.location.href = "index.html";
-
-            } catch (error) {
-                console.error("Error en el registro:", error);
-                alert("Error conectando al servidor");
-            }
-        }
-    }
-
-
     if (document.body.classList.contains("principal")) {
+
+        mostrarNombreEdad();
 
         let botonHogar = document.getElementById("boton-hogar");
         let botonMatches = document.getElementById("boton-matches");
@@ -154,6 +165,28 @@ document.addEventListener("DOMContentLoaded", e => {
         let matches = "x";
         buscadorPlaceholder.placeholder = `Buscar ${matches} matches`;
 
+        function calcularEdad(fechaNacimiento) {
+            const hoy = new Date();
+            const nacimiento = new Date(fechaNacimiento);
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+            const m = hoy.getMonth() - nacimiento.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
+                edad--;
+            }
+            return edad;
+        }
+
+        function mostrarNombreEdad() {
+            const nombre = localStorage.getItem("nombre");
+            const fechaNacimiento = localStorage.getItem("fechaNacimiento");
+
+            if (!nombre || !fechaNacimiento) return;
+
+            const edad = calcularEdad(fechaNacimiento);
+
+            const parrafo = document.getElementById("nombre-edad-perfil");
+            parrafo.textContent = `${nombre}, ${edad}.`;
+        }
 
         function mostrarPanel(panel) {
             panelHogar.classList.add("oculto");

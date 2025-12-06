@@ -126,7 +126,7 @@
      color: white;
  }
 
-  .formRegistro input[type="email"]:focus {
+ .formRegistro input[type="email"]:focus {
      color: white;
  }
 
@@ -218,7 +218,7 @@
      color: white;
  }
 
-  .formLogin input[type="email"]:focus {
+ .formLogin input[type="email"]:focus {
      color: white;
  }
 
@@ -446,6 +446,50 @@
      /* ajusta la imagen sin deformarla */
      object-fit: cover;
      border-radius: 10px;
+ }
+
+ .perfil {
+     display: flex;
+     flex-direction: column;
+     height: 100vh;
+     border-radius: 10px;
+     align-items: center;
+     color: white;
+     font-size: 16px;
+ }
+
+ .panelPerfil {
+     display: flex;
+     flex-direction: column;
+     height: 80vh;
+     width: 95vw;
+     justify-content: center;
+     align-items: center;
+ }
+
+ #btn-foto-perfil{
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: none;
+ }
+
+ #nombre-edad-perfil{
+    color: white;
+    font-size: 20px;
+ }
+
+ #btn-editar-perfil{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    border: none;
+    gap: 4px;
+    font-weight: bold;
+    width: 120px;
+    height: 30px;
  }
 
  .oculto {
