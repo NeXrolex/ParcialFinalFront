@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", e => {
+
     if (document.body.classList.contains("index")) {
+
 
         let botonIniciarSesionIndex = document.getElementById("btn-iniciarsesion-index");
         let botonCrearCuentaIndex = document.getElementById("btn-crearcuenta-index");
@@ -74,6 +76,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 }
 
                 const data = await response.json();
+                localStorage.setItem("idUsuario", data.id);
                 localStorage.setItem("nombre", data.nombre);
                 localStorage.setItem("apellido", data.apellido);
                 localStorage.setItem("correo", data.correo);
@@ -123,6 +126,7 @@ document.addEventListener("DOMContentLoaded", e => {
 
                 // Validar clave
                 if (usuario.password === passwordLogin) {
+                    localStorage.setItem("idUsuario", usuario.id);
                     localStorage.setItem("nombre", usuario.nombre);
                     localStorage.setItem("correo", usuario.correo);
                     localStorage.setItem("fechaNacimiento", usuario.fechaNacimiento);
@@ -141,6 +145,7 @@ document.addEventListener("DOMContentLoaded", e => {
     }
 
     if (document.body.classList.contains("principal")) {
+
 
         mostrarNombreEdad();
 
@@ -201,43 +206,179 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
 
-        let contenedorSubirFoto = document.querySelectorAll(".contenedorSubirFoto")
+        function renderGrid() {
+            const contenedores = document.querySelectorAll(".contenedorSubirFoto");
 
-        function subirFoto() {
-            contenedorSubirFoto.forEach(contenedor => {
+            contenedores.forEach((c, index) => {
+                const preview = c.querySelector(".preview");
+                const icono = c.querySelector(".icono-subir");
+                const eliminar = c.querySelector(".eliminar-foto");
+                const input = c.querySelector("input[type='file']");
 
-                const input = contenedor.querySelector("input[type='file']");
-                const preview = contenedor.querySelector(".preview");
-                const icono = contenedor.querySelector(".icono-subir");
-                const eliminar = contenedor.querySelector(".eliminar-foto");
+                const foto = fotos[index];
 
-                input.addEventListener("change", e => {
-                    const file = e.target.files[0];
-                    if (!file) return;
-
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                        preview.src = reader.result;
-                        preview.style.display = "block";       // Muestra la foto
-                        icono.style.display = "none";          // Ocultar el ícono de subir foto
-                        eliminar.style.display = "block";      // Muestra el botón para eliminar
-                        contenedor.style.border = "none";      // quita el borde
-                    };
-                    reader.readAsDataURL(file);
-                });
-
-                eliminar.addEventListener("click", () => {
+                // Si es una foto nueva subida desde input
+                if (foto instanceof File) {
+                    preview.src = URL.createObjectURL(foto);
+                    preview.style.display = "block";
+                    icono.style.display = "none";
+                    eliminar.style.display = "block";
+                    c.style.border = "none";
+                }
+                // Si es una foto que existe en BD
+                else if (foto === "EXISTE_EN_BD") {
+                    // No tocamos el src porque ya lo puso cargarFotosUsuario()
+                    preview.style.display = "block";
+                    icono.style.display = "none";
+                    eliminar.style.display = "block";
+                    c.style.border = "none";
+                }
+                // Si no hay nada
+                else {
                     preview.src = "";
-                    preview.style.display = "none";           // Oculta la foto
-                    icono.style.display = "block";            // Muestra el ícono de subir foto
-                    eliminar.style.display = "none";          // Oculta el botón
-                    input.value = "";
-                    contenedor.style.border = "2px dashed gray"; // Mostrar borde de nuevo
-                });
+                    preview.style.display = "none";
+                    icono.style.display = "block";
+                    eliminar.style.display = "none";
+                    c.style.border = "2px dashed gray";
+                }
+
+                // Eliminar foto
+                eliminar.onclick = async (e) => {
+                    e.stopPropagation();
+
+                    const idFoto = c.dataset.idFoto;
+
+                    // Si existe en BD → eliminar
+                    if (idFoto) {
+                        await fetch(`http://localhost:8080/api/foto/${idFoto}`, {
+                            method: "DELETE"
+                        });
+                        c.dataset.idFoto = "";
+                    }
+
+                    fotos[index] = null;
+                    renderGrid();
+
+                    await enviarFotosAPI(localStorage.getItem("idUsuario"));
+                };
             });
         }
 
-        subirFoto();
+
+        const fotos = Array(9).fill(null);
+        const contenedores = document.querySelectorAll(".contenedorSubirFoto");
+
+        contenedores.forEach((contenedor, index) => {
+
+            const input = contenedor.querySelector("input[type='file']");
+
+            input.addEventListener("change", async e => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const posicion = fotos.findIndex(f => f === null);
+
+
+
+                if (posicion === -1) {
+                    alert("Máximo 9 fotos");
+                    input.value = "";
+                    return;
+                }
+
+                fotos[posicion] = file;
+
+                renderGrid();
+                input.value = "";
+
+                await enviarFotosAPI(localStorage.getItem("idUsuario"));
+            });
+
+        });
+
+
+        async function enviarFotosAPI(usuarioId) {
+
+            const formData = new FormData();
+
+            fotos.forEach((file, index) => {
+                if (file !== null) {
+                    formData.append("fotos", file);
+                    formData.append("orden", index); // <-- IMPORTANTE
+                }
+            });
+
+            const response = await fetch(`http://localhost:8080/api/foto/subir/${usuarioId}`, {
+                method: "POST",
+                body: formData
+            });
+
+            const urls = await response.json();
+            console.log("URLs devueltas y ordenadas:", urls);
+        }
+
+
+
+        async function cargarFotosUsuario(idUsuario) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                const fotosBD = await res.json();
+
+                console.log("Fotos que vienen de BD:", fotosBD);
+
+                // Reiniciar arreglo local de fotos
+                fotos.fill(null);
+
+                const contenedores = document.querySelectorAll(".contenedorSubirFoto");
+
+                fotosBD.forEach(f => {
+                    const orden = f.orden;
+                    const cont = contenedores[orden];
+
+                    if (!cont) return;
+
+                    const preview = cont.querySelector(".preview");
+                    const icono = cont.querySelector(".icono-subir");
+                    const eliminar = cont.querySelector(".eliminar-foto");
+
+                    // Usar encodeURIComponent para evitar problemas con espacios en la URL
+                    preview.src = "http://localhost:8080/api/foto/archivo/" + encodeURIComponent(f.url);
+                    preview.style.display = "block";
+
+                    // Ocultar icono de subir y mostrar botón de eliminar
+                    icono.style.display = "none";
+                    eliminar.style.display = "block";
+
+                    // Guardar idFoto en el dataset del contenedor para poder eliminar
+                    cont.dataset.idFoto = f.id;
+
+                    // Marcar la posición como ocupada en el arreglo local
+                    fotos[orden] = "EXISTE_EN_BD";
+                });
+
+            } catch (e) {
+                console.error("Error cargando fotos:", e);
+            }
+        }
+
+        const idUsuario = localStorage.getItem("idUsuario");
+        cargarFotosUsuario(idUsuario);
+
+        document.addEventListener("click", async e => {
+            if (e.target.classList.contains("btn-eliminar-foto")) {
+                const img = e.target.parentElement.querySelector("img");
+                const idFoto = img.dataset.id;
+
+                if (idFoto) {
+                    await fetch(`http://localhost:8080/api/foto/${idFoto}`, {
+                        method: "DELETE"
+                    });
+                }
+
+                e.target.parentElement.remove();
+            }
+        });
+
 
         document.addEventListener("click", e => {
 
@@ -292,7 +433,7 @@ document.addEventListener("DOMContentLoaded", e => {
             if (!cardTop) return;
 
             cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
-            cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
+            cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * - 30}deg)`;
 
             setTimeout(() => {
                 cardTop.remove();
@@ -438,7 +579,7 @@ document.addEventListener("DOMContentLoaded", e => {
 
             if (direccion !== 0) {
                 // animar fuera
-                cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
+                cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * - 30}deg)`;
 
                 setTimeout(() => {
                     // eliminar top actual
