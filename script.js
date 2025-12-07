@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", e => {
-
     if (document.body.classList.contains("index")) {
 
         let botonIniciarSesionIndex = document.getElementById("btn-iniciarsesion-index");
@@ -160,9 +159,10 @@ document.addEventListener("DOMContentLoaded", e => {
         let cardTop = document.querySelector(".card-top");
         let cardNext = document.querySelector(".card-next");
 
-        let btnLike = document.getElementById("btn-like");
-        let btnDislike = document.getElementById("btn-dislike");
-        let btnSuperLike = document.getElementById("btn-superlike");
+        let footerPrincipal = document.querySelector(".footerPrincipal");
+        let headerPrincipal = document.querySelector(".headerPrincipal");
+        let editarPerfil = document.querySelector(".contenedorEditarPerfil");
+        let btnVolver = document.getElementById("btn-volver");
 
         let buscadorPlaceholder = document.getElementById("buscar-matches")
 
@@ -201,6 +201,43 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
 
+        let contenedorSubirFoto = document.querySelectorAll(".contenedorSubirFoto")
+
+        function subirFoto() {
+            contenedorSubirFoto.forEach(contenedor => {
+
+                const input = contenedor.querySelector("input[type='file']");
+                const preview = contenedor.querySelector(".preview");
+                const icono = contenedor.querySelector(".icono-subir");
+                const eliminar = contenedor.querySelector(".eliminar-foto");
+
+                input.addEventListener("change", e => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        preview.src = reader.result;
+                        preview.style.display = "block";       // Muestra la foto
+                        icono.style.display = "none";          // Ocultar el ícono de subir foto
+                        eliminar.style.display = "block";      // Muestra el botón para eliminar
+                        contenedor.style.border = "none";      // quita el borde
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                eliminar.addEventListener("click", () => {
+                    preview.src = "";
+                    preview.style.display = "none";           // Oculta la foto
+                    icono.style.display = "block";            // Muestra el ícono de subir foto
+                    eliminar.style.display = "none";          // Oculta el botón
+                    input.value = "";
+                    contenedor.style.border = "2px dashed gray"; // Mostrar borde de nuevo
+                });
+            });
+        }
+
+        subirFoto();
 
         document.addEventListener("click", e => {
 
@@ -233,6 +270,19 @@ document.addEventListener("DOMContentLoaded", e => {
             }
             if (e.target.closest("#btn-dislike")) {
                 moverTarjeta(-1);
+            }
+
+            if (e.target.closest("#btn-editar-perfil")) {
+                mostrarPanel(editarPerfil);
+                footerPrincipal.classList.add("oculto");
+                headerPrincipal.classList.add("oculto")
+            }
+
+            if (e.target.closest("#btn-volver")) {
+                mostrarPanel(panelPerfil);
+                editarPerfil.classList.add("oculto");
+                footerPrincipal.classList.remove("oculto");
+                headerPrincipal.classList.remove("oculto")
             }
         });
 
