@@ -297,14 +297,52 @@
      transform-origin: center center;
  }
 
+ .tarjeta img {
+     z-index: 0;
+     object-fit: cover;
+     border-radius: 10px;
+     width: 100%;
+     height: 100%;
+     position: absolute;
+     inset: 0;
+ }
+
+ .tarjeta h2 {
+     position: absolute;
+     bottom: 30px;
+     margin: 20px;
+     color: white;
+     font-size: 20px;
+     border-radius: 5px;
+     z-index: 2;
+ }
+
+ .tarjeta::after {
+     content: "";
+     position: absolute;
+     bottom: 0;
+     left: 0;
+     width: 100%;
+     height: 100px;
+     /* altura de la sombra */
+     background: linear-gradient(0deg, rgba(0, 0, 0, 1) 51%, rgba(255, 255, 255, 0) 100%);
+     border-radius: 0 0 10px 10px;
+     /* coincide con la tarjeta */
+     z-index: 1;
+     /* sobre la img pero debajo del h2 */
+     pointer-events: none;
+ }
+
  .card-top {
      z-index: 3;
+     object-fit: cover;
  }
 
  .card-next {
      position: absolute;
      z-index: 2;
      transform: scale(0.92) translateY(25px);
+     object-fit: cover;
      transition: transform 0.3s ease;
      pointer-events: none;
  }
@@ -318,6 +356,59 @@
  .hidden-card {
      opacity: 0;
  }
+
+ .carrusel-tarjeta {
+     position: absolute;
+     inset: 0;
+     overflow: hidden;
+     border-radius: 10px;
+ }
+
+ .carrusel-tarjeta img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     position: absolute;
+     inset: 0;
+     z-index: 0;
+     border-radius: 10px;
+ }
+
+ .indicadores-fotos {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;              /* Ajusta el ancho total de la barra */
+    display: flex;
+    justify-content: space-evenly;   /* Distribución uniforme */
+    gap: 6px;
+    z-index: 2;
+}
+
+.indicadores-fotos .punto {
+    flex: 1;                         /* Cada barra ocupa espacio disponible */
+    height: 6px;    
+    border: 1px solid gray;
+    transform: scaleY(0.5);                 /* Grosor de las barras */
+    background: #0B0B0D;
+    border-radius: 2px;
+    transition: background 0.3s;
+}
+
+.indicadores-fotos .punto.activo {
+    background: rgba(255, 255, 255, 1);
+}
+
+
+ .carrusel-tarjeta .prev-foto {
+     left: 10px;
+ }
+
+ .carrusel-tarjeta .next-foto {
+     right: 10px;
+ }
+
 
  .contenedorBotonesSwap {
      display: flex;
@@ -492,6 +583,20 @@
      height: 70px;
      border-radius: 50%;
      border: none;
+     padding: 0;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     overflow: hidden;
+     background-color: #1C1C1F;
+
+ }
+
+ #btn-foto-perfil img {
+     object-fit: cover;
+     min-width: 70px;
+     min-height: 70px;
+     border-radius: 50%;
  }
 
  #nombre-edad-perfil {
@@ -620,49 +725,50 @@
  }
 
  .contenedorSubirFoto {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    border: 2px dashed gray;
-    border-radius: 10px;
-    width: 110px;
-    height: 170px;
-}
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     position: relative;
+     border: 2px dashed gray;
+     border-radius: 10px;
+     width: 110px;
+     height: 170px;
+ }
 
-/* Foto cargada (invisible hasta que haya src) */
-.contenedorSubirFoto .preview {
-    display: none;            /* Importante */
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-}
+ /* Foto cargada (invisible hasta que haya src) */
+ .contenedorSubirFoto .preview {
+     display: none;
+     /* Importante */
+     width: 100%;
+     height: 100%;
+     object-fit: cover;
+     border-radius: 10px;
+ }
 
-/* Ícono centrado sin deformación */
-.icono-subir {
-    position: absolute;
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-    pointer-events: none;
-}
+ /* Ícono centrado sin deformación */
+ .icono-subir {
+     position: absolute;
+     width: 40px;
+     height: 40px;
+     object-fit: contain;
+     pointer-events: none;
+ }
 
-/* Ocultar el botón de eliminar desde el inicio */
-.eliminar-foto {
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 20px;
-    height: 20px;
-    transform: translate(40%, -40%);
-    border: 1px solid gray;
-    border-radius: 50%;
-    background-color: #0B0B0D;
-    padding: 2px;
-    cursor: pointer;
-}
+ /* Ocultar el botón de eliminar desde el inicio */
+ .eliminar-foto {
+     display: none;
+     position: absolute;
+     top: 0;
+     right: 0;
+     width: 20px;
+     height: 20px;
+     transform: translate(40%, -40%);
+     border: 1px solid gray;
+     border-radius: 50%;
+     background-color: #0B0B0D;
+     padding: 2px;
+     cursor: pointer;
+ }
 
  .contenedorSubirFoto input[type="file"] {
      position: absolute;

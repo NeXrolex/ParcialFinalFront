@@ -146,351 +146,352 @@ document.addEventListener("DOMContentLoaded", e => {
 
     if (document.body.classList.contains("principal")) {
 
+        // ===================
+        // Variables globales
+        // ===================
+        const idUsuario = localStorage.getItem("idUsuario");
+        const fotos = Array(9).fill(null);
+        let usuarios = [];
+        let indexUsuarioActual = 0;
 
-        mostrarNombreEdad();
+        // Paneles y botones
+        const panelHogar = document.querySelector(".hogar");
+        const panelMatches = document.querySelector(".matches");
+        const panelPerfil = document.querySelector(".perfil");
+        const editarPerfil = document.querySelector(".contenedorEditarPerfil");
+        const footerPrincipal = document.querySelector(".footerPrincipal");
+        const headerPrincipal = document.querySelector(".headerPrincipal");
+        const botonHogar = document.getElementById("boton-hogar");
+        const botonMatches = document.getElementById("boton-matches");
+        const botonPerfil = document.getElementById("boton-perfil");
+        const imgHogar = botonHogar.querySelector("img");
+        const imgMatches = botonMatches.querySelector("img");
+        const imgPerfil = botonPerfil.querySelector("img");
+        const btnVolver = document.getElementById("btn-volver");
+        const contenedoresFotos = document.querySelectorAll(".contenedorSubirFoto");
+        const contenedorSwipe = document.querySelector(".contenedorSwipe");
 
-        let botonHogar = document.getElementById("boton-hogar");
-        let botonMatches = document.getElementById("boton-matches");
-        let botonPerfil = document.getElementById("boton-perfil");
+        // ===================
+        // FUNCIONES
+        // ===================
 
-        let panelHogar = document.querySelector(".hogar");
-        let panelMatches = document.querySelector(".matches");
-        let panelPerfil = document.querySelector(".perfil");
-
-        let imgHogar = botonHogar.querySelector("img");
-        let imgMatches = botonMatches.querySelector("img");
-        let imgPerfil = botonPerfil.querySelector("img");
-
-        let cardTop = document.querySelector(".card-top");
-        let cardNext = document.querySelector(".card-next");
-
-        let footerPrincipal = document.querySelector(".footerPrincipal");
-        let headerPrincipal = document.querySelector(".headerPrincipal");
-        let editarPerfil = document.querySelector(".contenedorEditarPerfil");
-        let btnVolver = document.getElementById("btn-volver");
-
-        let buscadorPlaceholder = document.getElementById("buscar-matches")
-
-        let matches = "x";
-        buscadorPlaceholder.placeholder = `Buscar ${matches} matches`;
-
+        // ---- Perfil ----
         function calcularEdad(fechaNacimiento) {
             const hoy = new Date();
             const nacimiento = new Date(fechaNacimiento);
             let edad = hoy.getFullYear() - nacimiento.getFullYear();
             const m = hoy.getMonth() - nacimiento.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-                edad--;
-            }
+            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
             return edad;
         }
 
         function mostrarNombreEdad() {
             const nombre = localStorage.getItem("nombre");
             const fechaNacimiento = localStorage.getItem("fechaNacimiento");
-
             if (!nombre || !fechaNacimiento) return;
-
             const edad = calcularEdad(fechaNacimiento);
-
-            const parrafo = document.getElementById("nombre-edad-perfil");
-            parrafo.textContent = `${nombre}, ${edad}.`;
+            document.getElementById("nombre-edad-perfil").textContent = `${nombre}, ${edad}.`;
         }
 
+        // ---- Navegación de paneles ----
         function mostrarPanel(panel) {
-            panelHogar.classList.add("oculto");
-            panelMatches.classList.add("oculto");
-            panelPerfil.classList.add("oculto");
-
+            [panelHogar, panelMatches, panelPerfil, editarPerfil].forEach(p => p.classList.add("oculto"));
             panel.classList.remove("oculto");
         }
 
+        function cambiarIconos(seleccion) {
+            const estados = {
+                hogar: ["imgs/iconotindercolor.png", "imgs/iconomatches.png", "imgs/iconoperfil.png"],
+                matches: ["imgs/iconotinder.png", "imgs/iconomatchescolor.png", "imgs/iconoperfil.png"],
+                perfil: ["imgs/iconotinder.png", "imgs/iconomatches.png", "imgs/iconoperfilcolor.png"]
+            };
+            [imgHogar, imgMatches, imgPerfil].forEach((img, i) => img.src = estados[seleccion][i]);
+        }
+
+        // ---- Fotos ----
+        async function cargarFotosUsuario(idUsuario) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                const fotosBD = await res.json();
+                fotos.fill(null);
+                fotosBD.forEach(f => {
+                    const cont = contenedoresFotos[f.orden];
+                    if (!cont) return;
+                    const preview = cont.querySelector(".preview");
+                    const icono = cont.querySelector(".icono-subir");
+                    const eliminar = cont.querySelector(".eliminar-foto");
+                    preview.src = "http://localhost:8080/api/foto/archivo/" + encodeURIComponent(f.url);
+                    preview.style.display = "block";
+                    icono.style.display = "none";
+                    eliminar.style.display = "block";
+                    cont.dataset.idFoto = f.id;
+                    fotos[f.orden] = "EXISTE_EN_BD";
+                });
+            } catch (e) {
+                console.error("Error cargando fotos:", e);
+            }
+        }
 
         function renderGrid() {
-            const contenedores = document.querySelectorAll(".contenedorSubirFoto");
-
-            contenedores.forEach((c, index) => {
+            contenedoresFotos.forEach((c, index) => {
                 const preview = c.querySelector(".preview");
                 const icono = c.querySelector(".icono-subir");
                 const eliminar = c.querySelector(".eliminar-foto");
-                const input = c.querySelector("input[type='file']");
-
                 const foto = fotos[index];
 
-                // Si es una foto nueva subida desde input
                 if (foto instanceof File) {
                     preview.src = URL.createObjectURL(foto);
                     preview.style.display = "block";
                     icono.style.display = "none";
                     eliminar.style.display = "block";
                     c.style.border = "none";
-                }
-                // Si es una foto que existe en BD
-                else if (foto === "EXISTE_EN_BD") {
-                    // No tocamos el src porque ya lo puso cargarFotosUsuario()
+                } else if (foto === "EXISTE_EN_BD") {
                     preview.style.display = "block";
                     icono.style.display = "none";
                     eliminar.style.display = "block";
                     c.style.border = "none";
-                }
-                // Si no hay nada
-                else {
+                } else {
                     preview.src = "";
                     preview.style.display = "none";
                     icono.style.display = "block";
                     eliminar.style.display = "none";
                     c.style.border = "2px dashed gray";
                 }
-
-                // Eliminar foto
-                eliminar.onclick = async (e) => {
-                    e.stopPropagation();
-
-                    const idFoto = c.dataset.idFoto;
-
-                    // Si existe en BD → eliminar
-                    if (idFoto) {
-                        await fetch(`http://localhost:8080/api/foto/${idFoto}`, {
-                            method: "DELETE"
-                        });
-                        c.dataset.idFoto = "";
-                    }
-
-                    fotos[index] = null;
-                    renderGrid();
-
-                    await enviarFotosAPI(localStorage.getItem("idUsuario"));
-                };
             });
         }
 
+        async function cargarFotoPerfil() {
+            const idUsuario = localStorage.getItem("idUsuario");
+            const imgBtnPerfil = document.querySelector("#btn-foto-perfil img");
+            try {
+                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                const fotos = await res.json();
+                if (fotos.length > 0) {
+                    const urlFoto = fotos[0].url;
+                    imgBtnPerfil.src = `http://localhost:8080/api/foto/archivo/${encodeURIComponent(urlFoto)}`;
+                } else {
+                    imgBtnPerfil.src = "";
+                }
+            } catch (e) {
+                console.error("Error cargando foto de perfil:", e);
+            }
+        }
 
-        const fotos = Array(9).fill(null);
-        const contenedores = document.querySelectorAll(".contenedorSubirFoto");
+        async function enviarFotosAPI(usuarioId) {
+            const formData = new FormData();
+            fotos.forEach((file, index) => {
+                if (file instanceof File) {
+                    formData.append("fotos", file);
+                    formData.append("orden", index);
+                }
+            });
+            if ([...formData].length === 0) return;
+            try {
+                const response = await fetch(`http://localhost:8080/api/foto/subir/${usuarioId}`, { method: "POST", body: formData });
+                const urls = await response.json();
+                console.log("Fotos subidas:", urls);
+            } catch (err) {
+                console.error("Error subiendo fotos:", err);
+            }
+        }
 
-        contenedores.forEach((contenedor, index) => {
+        // ---- Tarjetas ----
+        async function cargarTarjetasUsuarios(idUsuarioActual) {
+            try {
+                const res = await fetch(`http://localhost:8080/api/usuarios/otros/${idUsuarioActual}`);
+                usuarios = await res.json();
 
-            const input = contenedor.querySelector("input[type='file']");
+                // Limpiar contenedor antes de agregar nuevas tarjetas
+                contenedorSwipe.innerHTML = "";
 
+                usuarios.forEach((user, index) => {
+                    const card = crearTarjeta(user);
+
+                    if (index === 0) card.classList.add("card-top");
+                    else if (index === 1) {
+                        card.classList.add("card-next");
+                        card.style.transform = "scale(0.92) translateY(25px)";
+                    } else card.classList.add("card-back");
+
+                    contenedorSwipe.appendChild(card);
+                });
+
+                // Cargar las fotos en cada tarjeta
+                for (let i = 0; i < usuarios.length; i++) {
+                    await llenarTarjetaUsuario(i);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function llenarTarjetaUsuario(pos) {
+            if (pos >= usuarios.length) return;
+            const user = usuarios[pos];
+
+            let fotosUsuario = [];
+            try {
+                const res = await fetch(`http://localhost:8080/api/foto/usuario/${user.id}`);
+                const arr = await res.json();
+                fotosUsuario = arr.map(f => `http://localhost:8080/api/foto/archivo/${encodeURIComponent(f.url)}`);
+            } catch (e) {
+                console.error("Error cargando fotos de usuario:", e);
+            }
+
+            const tarjetas = contenedorSwipe.querySelectorAll(".tarjeta");
+            if (pos >= tarjetas.length) return;
+            const card = tarjetas[pos];
+
+            card.dataset.fotos = JSON.stringify(fotosUsuario);
+            const img = card.querySelector(".foto-activa");
+            if (fotosUsuario.length > 0) img.src = fotosUsuario[0];
+
+            actualizarIndicadores(card);
+        }
+
+
+
+        // ===================
+        // EVENTOS
+        // ===================
+        contenedoresFotos.forEach((c, index) => {
+            const input = c.querySelector("input[type='file']");
             input.addEventListener("change", async e => {
                 const file = e.target.files[0];
                 if (!file) return;
-
                 const posicion = fotos.findIndex(f => f === null);
-
-
-
                 if (posicion === -1) {
                     alert("Máximo 9 fotos");
                     input.value = "";
                     return;
                 }
-
                 fotos[posicion] = file;
-
                 renderGrid();
+                actualizarFotoPerfil();
                 input.value = "";
-
-                await enviarFotosAPI(localStorage.getItem("idUsuario"));
+                await enviarFotosAPI(idUsuario);
             });
-
+            const eliminar = c.querySelector(".eliminar-foto");
+            eliminar.addEventListener("click", async e => {
+                e.stopPropagation();
+                const idFoto = c.dataset.idFoto;
+                if (idFoto) await fetch(`http://localhost:8080/api/foto/${idFoto}`, { method: "DELETE" });
+                fotos[index] = null;
+                c.dataset.idFoto = "";
+                renderGrid();
+                actualizarFotoPerfil();
+                await enviarFotosAPI(idUsuario);
+            });
         });
 
+        async function actualizarFotoPerfil() {
+            const btnFoto = document.querySelector("#btn-foto-perfil img");
+            // Buscar primera foto válida en el array
+            const primera = fotos.find(f => f instanceof File || f === "EXISTE_EN_BD");
+            if (!primera) {
+                btnFoto.src = "";
+                return;
+            }
 
-        async function enviarFotosAPI(usuarioId) {
-
-            const formData = new FormData();
-
-            fotos.forEach((file, index) => {
-                if (file !== null) {
-                    formData.append("fotos", file);
-                    formData.append("orden", index); // <-- IMPORTANTE
+            if (primera instanceof File) {
+                btnFoto.src = URL.createObjectURL(primera);
+            } else if (primera === "EXISTE_EN_BD") {
+                try {
+                    const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                    const arr = await res.json();
+                    if (arr.length > 0) btnFoto.src = `http://localhost:8080/api/foto/archivo/${encodeURIComponent(arr[0].url)}`;
+                } catch (e) {
+                    console.error("Error cargando foto de perfil:", e);
+                    btnFoto.src = "";
                 }
-            });
-
-            const response = await fetch(`http://localhost:8080/api/foto/subir/${usuarioId}`, {
-                method: "POST",
-                body: formData
-            });
-
-            const urls = await response.json();
-            console.log("URLs devueltas y ordenadas:", urls);
-        }
-
-
-
-        async function cargarFotosUsuario(idUsuario) {
-            try {
-                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
-                const fotosBD = await res.json();
-
-                console.log("Fotos que vienen de BD:", fotosBD);
-
-                // Reiniciar arreglo local de fotos
-                fotos.fill(null);
-
-                const contenedores = document.querySelectorAll(".contenedorSubirFoto");
-
-                fotosBD.forEach(f => {
-                    const orden = f.orden;
-                    const cont = contenedores[orden];
-
-                    if (!cont) return;
-
-                    const preview = cont.querySelector(".preview");
-                    const icono = cont.querySelector(".icono-subir");
-                    const eliminar = cont.querySelector(".eliminar-foto");
-
-                    // Usar encodeURIComponent para evitar problemas con espacios en la URL
-                    preview.src = "http://localhost:8080/api/foto/archivo/" + encodeURIComponent(f.url);
-                    preview.style.display = "block";
-
-                    // Ocultar icono de subir y mostrar botón de eliminar
-                    icono.style.display = "none";
-                    eliminar.style.display = "block";
-
-                    // Guardar idFoto en el dataset del contenedor para poder eliminar
-                    cont.dataset.idFoto = f.id;
-
-                    // Marcar la posición como ocupada en el arreglo local
-                    fotos[orden] = "EXISTE_EN_BD";
-                });
-
-            } catch (e) {
-                console.error("Error cargando fotos:", e);
             }
         }
-
-        const idUsuario = localStorage.getItem("idUsuario");
-        cargarFotosUsuario(idUsuario);
-
-        document.addEventListener("click", async e => {
-            if (e.target.classList.contains("btn-eliminar-foto")) {
-                const img = e.target.parentElement.querySelector("img");
-                const idFoto = img.dataset.id;
-
-                if (idFoto) {
-                    await fetch(`http://localhost:8080/api/foto/${idFoto}`, {
-                        method: "DELETE"
-                    });
-                }
-
-                e.target.parentElement.remove();
-            }
-        });
 
 
         document.addEventListener("click", e => {
+            if (e.target.closest("#boton-hogar")) { mostrarPanel(panelHogar); cambiarIconos("hogar"); }
+            if (e.target.closest("#boton-matches")) { mostrarPanel(panelMatches); cambiarIconos("matches"); }
+            if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
+            if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
+            if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
+            if (e.target.closest("#btn-like")) moverTarjeta(1);
+            if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
 
-            if (e.target.closest("#boton-hogar")) {
-                mostrarPanel(panelHogar);
+            if (e.target.closest(".contenedorSwipe")) {
+                const card = e.target.closest(".tarjeta");
+                if (!card) return;
 
-                imgHogar.src = "imgs/iconotindercolor.png";
-                imgMatches.src = "imgs/iconomatches.png";
-                imgPerfil.src = "imgs/iconoperfil.png";
+                const fotos = JSON.parse(card.dataset.fotos || "[]");
+                if (fotos.length === 0) return;
+
+                let index = parseInt(card.dataset.indexFoto || 0);
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left; // posición X relativa a la tarjeta
+
+                if (x < rect.width / 2) {
+                    // izquierda
+                    index = (index - 1 + fotos.length) % fotos.length;
+                } else {
+                    // derecha
+                    index = (index + 1) % fotos.length;
+                }
+
+                card.dataset.indexFoto = index;
+                card.querySelector(".foto-activa").src = fotos[index];
+                actualizarIndicadores(card);
             }
 
-            if (e.target.closest("#boton-matches")) {
-                mostrarPanel(panelMatches);
-
-                imgHogar.src = "imgs/iconotinder.png";
-                imgMatches.src = "imgs/iconomatchescolor.png";
-                imgPerfil.src = "imgs/iconoperfil.png";
-            }
-
-            if (e.target.closest("#boton-perfil")) {
-                mostrarPanel(panelPerfil);
-
-                imgHogar.src = "imgs/iconotinder.png";
-                imgMatches.src = "imgs/iconomatches.png";
-                imgPerfil.src = "imgs/iconoperfilcolor.png";
-            }
-
-            if (e.target.closest("#btn-like")) {
-                moverTarjeta(1);
-            }
-            if (e.target.closest("#btn-dislike")) {
-                moverTarjeta(-1);
-            }
-
-            if (e.target.closest("#btn-editar-perfil")) {
-                mostrarPanel(editarPerfil);
-                footerPrincipal.classList.add("oculto");
-                headerPrincipal.classList.add("oculto")
-            }
-
-            if (e.target.closest("#btn-volver")) {
-                mostrarPanel(panelPerfil);
-                editarPerfil.classList.add("oculto");
-                footerPrincipal.classList.remove("oculto");
-                headerPrincipal.classList.remove("oculto")
-            }
         });
 
-
-        function moverTarjeta(direccion) {
-            const cardTop = document.querySelector(".card-top");
-            if (!cardTop) return;
-
-            cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
-            cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * - 30}deg)`;
-
-            setTimeout(() => {
-                cardTop.remove();
-                promoverTarjetas();
-                agregarNuevaTarjeta();
-            }, 420);
-
-            // animar siguiente tarjeta
-            const next = document.querySelector(".card-next");
-            if (next) {
-                next.style.transition = "transform .3s ease";
-                next.style.transform = "scale(0.92) translateY(25px)";
-            }
-        }
+        // ===================
+        // INIT
+        // ===================
+        // INIT
+        mostrarNombreEdad();
+        cargarFotosUsuario(idUsuario);
+        cargarFotoPerfil();
+        actualizarFotoPerfil();
+        cargarTarjetasUsuarios(idUsuario);
 
 
-        // ========= CONFIG ==========
+        // ---- Movimiento de tarjetas ----
         const UMBRAL = 150;
         const limiteY = 25;
-        const contenedorSwipe = document.querySelector(".contenedorSwipe");
-
-        // cargar tarjetas iniciales
-        cargarTarjetas(3);
-
-        // estado swipe
         let arrastrando = false;
         let inicioX = 0, inicioY = 0;
         let deltaInicialX = null;
         let movXGlobal = 0;
 
-        // listener en contenedor pero validamos card-top al iniciar
         contenedorSwipe.addEventListener("mousedown", iniciarArrastre);
         contenedorSwipe.addEventListener("touchstart", iniciarArrastre, { passive: true });
 
-        function crearTarjeta() {
+        function crearTarjeta(user) {
             const div = document.createElement("div");
-            div.className = "tarjeta card-back";
+            div.className = "tarjeta";
+            div.dataset.indexFoto = 0;
+            div.dataset.idUsuario = user.id;
+
+            div.innerHTML = `
+        <div class="carrusel-tarjeta">
+            <div class="indicadores-fotos"></div>
+            <img class="foto-activa" src="" alt="Foto usuario" />
+        </div>
+        <h2>${user.nombre}, ${calcularEdad(user.fechaNacimiento)}.</h2>
+    `;
             return div;
         }
 
 
-        function cargarTarjetas(n) {
-            for (let i = 0; i < n; i++) {
-                const card = crearTarjeta();
-
-                if (i === 0) {
-                    card.classList.add("card-top");
-                } else if (i === 1) {
-                    card.classList.add("card-next");
-                    card.style.transform = "scale(0.92) translateY(25px)";
-                } else {
-                    card.classList.add("card-back");
-                }
-
-                contenedorSwipe.appendChild(card);
-            }
+        function actualizarIndicadores(card) {
+            const fotos = JSON.parse(card.dataset.fotos || "[]");
+            const index = parseInt(card.dataset.indexFoto || 0);
+            const cont = card.querySelector(".indicadores-fotos");
+            cont.innerHTML = fotos.map((_, i) =>
+                `<span class="punto ${i === index ? 'activo' : ''}"></span>`
+            ).join('');
         }
+
+
 
         function obtenerPunto(e) {
             if (e.touches && e.touches.length > 0) return e.touches[0];
@@ -500,23 +501,15 @@ document.addEventListener("DOMContentLoaded", e => {
         function iniciarArrastre(e) {
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
-
-            // evitar iniciar si el touch/mousedown viene de la tarjeta de atrás
-            // (por seguridad: comprobamos que el punto inicial esté dentro del cardTop)
             const p = obtenerPunto(e);
             const rect = cardTop.getBoundingClientRect();
-            if (!(p.clientX >= rect.left && p.clientX <= rect.right && p.clientY >= rect.top && p.clientY <= rect.bottom)) {
-                return;
-            }
-
+            if (!(p.clientX >= rect.left && p.clientX <= rect.right && p.clientY >= rect.top && p.clientY <= rect.bottom)) return;
             arrastrando = true;
             inicioX = p.clientX;
             inicioY = p.clientY;
             deltaInicialX = null;
             movXGlobal = 0;
-
             cardTop.style.transition = "none";
-
             document.addEventListener("mousemove", alMover);
             document.addEventListener("touchmove", alMover, { passive: false });
             document.addEventListener("mouseup", finMover);
@@ -525,41 +518,29 @@ document.addEventListener("DOMContentLoaded", e => {
 
         function alMover(e) {
             if (!arrastrando) return;
-
             const p = obtenerPunto(e);
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
-
-            // bloqueo scroll si hay predominio horizontal (touch)
             if (e.type === "touchmove") {
                 const dy = Math.abs(p.clientY - inicioY);
                 const dx = Math.abs(p.clientX - inicioX);
                 if (dx > dy) e.preventDefault();
             }
-
             let cambioX = p.clientX - inicioX;
             let cambioY = p.clientY - inicioY;
-
             if (deltaInicialX === null) deltaInicialX = cambioX;
             cambioX -= deltaInicialX;
-
             const resistencia = 1 - Math.exp(-Math.abs(cambioX) / 150);
             const movX = cambioX * resistencia;
             const movY = Math.max(Math.min(cambioY * 0.15, limiteY), -limiteY);
-
             movXGlobal = movX;
-
             const rotacion = movX / -20;
-
             cardTop.style.transform = `translate(${movX}px, ${movY}px) rotate(${rotacion}deg)`;
-
-            // opcional: animar ligeramente la siguiente tarjeta para dar feedback
             const next = document.querySelector(".card-next");
             if (next) {
-                // cuanto más mueves, más sube/escala la siguiente (pequeña reacción)
                 const progreso = Math.min(Math.abs(movX) / UMBRAL, 1);
-                const scale = 0.92 + 0.08 * progreso; // de 0.92 → 1
-                const ty = 25 - 25 * progreso; // de 25px → 0px
+                const scale = 0.92 + 0.08 * progreso;
+                const ty = 25 - 25 * progreso;
                 next.style.transform = `scale(${scale}) translateY(${ty}px)`;
             }
         }
@@ -567,41 +548,23 @@ document.addEventListener("DOMContentLoaded", e => {
         function finMover() {
             if (!arrastrando) return;
             arrastrando = false;
-
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
-
             cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
-
             let direccion = 0;
             if (movXGlobal > UMBRAL) direccion = 1;
             if (movXGlobal < -UMBRAL) direccion = -1;
-
             if (direccion !== 0) {
-                // animar fuera
-                cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * - 30}deg)`;
-
+                cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
                 setTimeout(() => {
-                    // eliminar top actual
                     cardTop.remove();
-                    promoverTarjetas();      // la siguiente sube
-                    agregarNuevaTarjeta();   // mantenemos el stack
+                    promoverTarjetas();
                 }, 420);
             } else {
-                // volver al centro
-                cardTop.style.transform = `translate(0px, 0px) rotate(0deg)`;
-
-                // devolver transform a next si lo modificamos
+                cardTop.style.transform = "translate(0px, 0px) rotate(0deg)";
                 const next = document.querySelector(".card-next");
-
-                if (next) {
-                    next.style.transition = "transform .3s ease";
-                    next.style.transform = "scale(0.92) translateY(25px)";
-                }
-
-
+                if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
             }
-
             document.removeEventListener("mousemove", alMover);
             document.removeEventListener("touchmove", alMover);
             document.removeEventListener("mouseup", finMover);
@@ -611,47 +574,34 @@ document.addEventListener("DOMContentLoaded", e => {
         function promoverTarjetas() {
             const next = document.querySelector(".card-next");
             const back = document.querySelector(".card-back");
-
-            // 1. Subir next → top
             if (next) {
                 next.classList.remove("card-next");
                 next.classList.add("card-top");
                 next.style.transition = "transform .35s ease";
-
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         next.style.transform = "translate(0px,0px) rotate(0deg)";
-                        setTimeout(() => {
-                            next.style.transition = "";
-                            next.style.transform = "";
-                        }, 360);
+                        setTimeout(() => { next.style.transition = ""; next.style.transform = ""; }, 360);
                     });
                 });
             }
-
-            // 2. Subir back → next
             if (back) {
                 back.classList.remove("card-back");
                 back.classList.add("card-next");
-
-                // reset transform para estar debajo del top
                 back.style.transform = "scale(0.92) translateY(25px)";
             }
         }
 
-
-        function agregarNuevaTarjeta() {
-            const card = crearTarjeta(); // ya nace como card-back
-            card.classList.add("hidden-card");
-
-            contenedorSwipe.appendChild(card);
-
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    card.classList.remove("hidden-card");
-                }, 50);
-            });
+        function moverTarjeta(direccion) {
+            const cardTop = document.querySelector(".card-top");
+            if (!cardTop) return;
+            cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
+            cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
+            setTimeout(() => { cardTop.remove(); promoverTarjetas(); }, 420);
+            const next = document.querySelector(".card-next");
+            if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
         }
+
     };
 });
 

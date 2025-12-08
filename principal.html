@@ -8,28 +8,25 @@
         <link rel="icon" type="image/png" href="imgs/iconoapp.png">
     </head>
     <body class="principal">
-        <header class="headerPrincipal oculto">
+        <header class="headerPrincipal">
             <h1>
                 <img src="imgs/iconoapp.png" alt="icono de tinder">
                 tinder
             </h1>
         </header>
-        <div class="hogar oculto">
-            <div class="contenedorSwipe">
-                <div class="tarjeta card-top"></div>
-                <div class="tarjeta card-next"></div>
-            </div>
+        <div class="hogar">
+            <div class="contenedorSwipe"></div>
             <div class="contenedorBotonesSwap">
                 <button class="botonesMatch" id="btn-dislike">
-                    <img src="imgs/iconoxroja.png" alt="icono de perfil">
+                    <img src="imgs/iconoxroja.png" alt="icono de dislike">
                     <br>
                 </button>
                 <button id="btn-superlike" class="botonesMatch">
-                    <img src="imgs/iconoestrella.png" alt="icono de perfil">
+                    <img src="imgs/iconoestrella.png" alt="icono de superlile">
                     <br>
                 </button>
                 <button class="botonesMatch" id="btn-like">
-                    <img src="imgs/iconocorazonverde.png" alt="icono de perfil">
+                    <img src="imgs/iconocorazonverde.png" alt="icono de like">
                     <br>
                 </button>
             </div>
@@ -43,8 +40,6 @@
                 <p>Tus conexiones.</p>
                 <div id="likes">
                     <div class="perfilesLike" id="div-likes"></div>
-                    <div class="perfilesLike" id="div-matches"></div>
-                    <div class="perfilesLike" id="div-matches"></div>
                 </div>
                 <p>Personas a las que le has gustado.</p>
                 <div id="matches">
@@ -55,7 +50,7 @@
         <div class="perfil oculto">
             <div class="panelPerfil">
                 <button id="btn-foto-perfil">
-                    <img src="" alt="foto de perfil">
+                    <img src="">
                 </button>
                 <p id="nombre-edad-perfil">Nombre, edad.</p>
                 <button id="btn-editar-perfil">
@@ -75,7 +70,7 @@
                     <button class="btnEditar" id="preview-datos">Vista previa</button>
                 </div>
             </div>
-            <div id="datos-editar">
+            <div id="datos-editar" oculto>
                 <h1>Media</h1>
                 <p>Agrega hasta 9 fotos.</p>
                 <div id="contenedor-agregar-fotos">
@@ -136,10 +131,10 @@
                 </div>
             </div>
         </section>
-        <footer class="footerPrincipal oculto">
+        <footer class="footerPrincipal">
             <div class="contenedorBotonesFooter">
                 <button class="botonesPrincipal" id="boton-hogar">
-                    <img src="imgs/iconotindercolor.png" alt="icono de tinder">
+                    <img src="imgs/iconotindercolor.png" alt="icono de hogar">
                     <br>
                     Hogar
                 </button>
