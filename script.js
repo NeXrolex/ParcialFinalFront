@@ -40,22 +40,16 @@ document.addEventListener("DOMContentLoaded", e => {
             // recoger los datos sin espacios
             const nombre = primeraLetraMayuscula(document.getElementById("nombre-registro").value.trim());
             const apellido = primeraLetraMayuscula(document.getElementById("apellido-registro").value.trim());
-            const nickname = document.getElementById("nickname-registro").value.trim();
             const correo = document.getElementById("correo-registro").value.trim();
             const password = document.getElementById("password-registro").value.trim();
-            const edad = parseInt(document.getElementById("edad-registro").value);
             const ciudad = document.getElementById("ciudad-registro").value.trim();
             const fechaNacimiento = document.getElementById("fecha-nacimiento-registro").value;
             const generoUsuario = document.getElementById("genero-registro").value;
 
-            // validación de campos para evitar que estén vacios
-            if (!nombre || !apellido || !nickname || !correo || !password || !edad || !ciudad) {
-                    alert("Por favor completa todos los campos.");
-                return;
-            }
 
-            if (nickname.length < 3) {
-                alert("El apodo debe tener al menos 3 caracteres.");
+            // validación de campos para evitar que estén vacios
+            if (!nombre || !apellido || !correo || !password || !edad || !ciudad) {
+                alert("Por favor completa todos los campos.");
                 return;
             }
 
@@ -64,17 +58,18 @@ document.addEventListener("DOMContentLoaded", e => {
                 return;
             }
 
+            const fechaRegistro = new Date().toISOString();
+
             // se recibe el json con todos los datos, incluso los que no necesitemos
             const usuario = {
-                nickname,
                 nombre,
                 apellido,
                 correo,
                 password,
-                edad,
                 ciudad,
                 fechaNacimiento,
                 generoUsuario,
+                fechaRegistro,
             };
 
             console.log("Enviando:", usuario);
@@ -183,9 +178,10 @@ document.addEventListener("DOMContentLoaded", e => {
         const imgHogar = botonHogar.querySelector("img");
         const imgMatches = botonMatches.querySelector("img");
         const imgPerfil = botonPerfil.querySelector("img");
-        const btnVolver = document.getElementById("btn-volver");
+        const btnVolverPerfil = document.getElementById("btn-volver-perfil");
         const contenedoresFotos = document.querySelectorAll(".contenedorSubirFoto");
         const contenedorSwipe = document.querySelector(".contenedorSwipe");
+        const botonCerrarSesion = document.getElementById("boton-cerrar-sesion");
 
         // ===================
         // FUNCIONES
@@ -317,10 +313,20 @@ document.addEventListener("DOMContentLoaded", e => {
                 const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuarioActual}`);
                 usuarios = await res.json();
 
-                // Limpiar contenedor antes de agregar nuevas tarjetas
+                const latA = parseFloat(localStorage.getItem("latActual"));
+                const lonA = parseFloat(localStorage.getItem("lonActual"));
+
                 contenedorSwipe.innerHTML = "";
 
                 usuarios.forEach((user, index) => {
+
+                    // Calcular distancia si el usuario tiene lat/lon guardados
+                    if (user.lat != null && user.lon != null) {
+                        user.distanciaKm = calcularDistancia(latA, lonA, user.lat, user.lon);
+                    } else {
+                        user.distanciaKm = null;
+                    }
+
                     const card = crearTarjeta(user);
 
                     if (index === 0) card.classList.add("card-top");
@@ -332,7 +338,6 @@ document.addEventListener("DOMContentLoaded", e => {
                     contenedorSwipe.appendChild(card);
                 });
 
-                // Cargar las fotos en cada tarjeta
                 for (let i = 0; i < usuarios.length; i++) {
                     await llenarTarjetaUsuario(i);
                 }
@@ -340,6 +345,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 console.error(e);
             }
         }
+
 
         async function llenarTarjetaUsuario(pos) {
             if (pos >= usuarios.length) return;
@@ -432,7 +438,6 @@ document.addEventListener("DOMContentLoaded", e => {
             if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
-
             if (e.target.closest(".contenedorSwipe")) {
                 const card = e.target.closest(".tarjeta");
                 if (!card) return;
@@ -456,13 +461,20 @@ document.addEventListener("DOMContentLoaded", e => {
                 card.querySelector(".foto-activa").src = fotos[index];
                 actualizarIndicadores(card);
             }
+            if (e.target === botonCerrarSesion) {
+                localStorage.removeItem("idUsuario");
+                localStorage.removeItem("nombre");
+                localStorage.removeItem("correo");
+                localStorage.removeItem("fechaNacimiento");
+                window.location.href = "index.html";
+            }
 
         });
 
         // ===================
         // INIT
         // ===================
-        // INIT
+
         mostrarNombreEdad();
         cargarFotosUsuario(idUsuario);
         cargarFotoPerfil();
@@ -486,6 +498,9 @@ document.addEventListener("DOMContentLoaded", e => {
             div.className = "tarjeta";
             div.dataset.indexFoto = 0;
             div.dataset.idUsuario = user.id;
+            const fechaUnion = user.fechaRegistro
+                ? formatearFechaUnion(user.fechaRegistro)
+                : "Fecha no disponible";
 
             div.innerHTML = `
         <div class="carrusel-tarjeta">
@@ -493,9 +508,27 @@ document.addEventListener("DOMContentLoaded", e => {
             <img class="foto-activa" src="" alt="Foto usuario" />
         </div>
         <h2>${user.nombre}, ${calcularEdad(user.fechaNacimiento)}.</h2>
+        <p>Vive en ${user.ciudad}.</p>
+        <p>A ${user.distanciaKm} km de distancia.</p>
+        <p>${fechaUnion}</p>
     `;
             return div;
         }
+
+        function formatearFechaUnion(fecha) {
+            const meses = [
+                "enero", "febrero", "marzo", "abril", "mayo", "junio",
+                "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+            ];
+
+            const f = new Date(fecha);
+            const dia = f.getDate();
+            const mes = meses[f.getMonth()];
+            const año = f.getFullYear();
+
+            return `Se unió el ${dia} de ${mes} del ${año}.`;
+        }
+
 
 
         function actualizarIndicadores(card) {
@@ -618,6 +651,48 @@ document.addEventListener("DOMContentLoaded", e => {
             if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
         }
 
+        function obtenerUbicacionUsuarioActual() {
+            navigator.geolocation.getCurrentPosition(
+                pos => {
+                    const lat = pos.coords.latitude;
+                    const lon = pos.coords.longitude;
+
+                    // Guardar localmente
+                    localStorage.setItem("latActual", lat);
+                    localStorage.setItem("lonActual", lon);
+
+                    const idUsuario = localStorage.getItem("idUsuario");
+                    enviarUbicacionBack(idUsuario, lat, lon);
+                },
+                err => console.error(err)
+            );
+        }
+
+
+        async function enviarUbicacionBack(idUsuario, lat, lon) {
+            await fetch(`http://localhost:8080/api/usuarios/ubicacion/${idUsuario}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ lat, lon })
+            });
+        }
+
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371; // radio de la Tierra en km
+
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+
+            const a =
+                Math.sin(dLat / 2) ** 2 +
+                Math.cos(lat1 * Math.PI / 180) *
+                Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) ** 2;
+
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+            return R * c; // distancia en km
+        }
+
     };
 });
-

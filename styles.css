@@ -134,12 +134,11 @@
      color: white;
  }
 
-
- #edad-registro {
+ #fecha-nacimiento-registro {
      color: gray;
  }
 
- #edad-registro:valid {
+ #fecha-nacimiento-registro:valid {
      color: white;
  }
 
@@ -147,6 +146,12 @@
  .formRegistro input[type="date"]::-webkit-calendar-picker-indicator {
      filter: invert(50%);
  }
+
+ /* cuando el input es válido (tiene fecha seleccionada) */
+ .formRegistro input[type="date"]:valid::-webkit-calendar-picker-indicator {
+     filter: invert(100%);
+ }
+
 
  .seleccionarGenero {
      background-color: #0B0B0D;
@@ -266,6 +271,7 @@
      display: flex;
      flex-direction: row;
      height: 5vh;
+     justify-content: space-between;
      position: relative;
      z-index: 3;
  }
@@ -277,6 +283,23 @@
      margin-left: 10px;
      color: rgba(252, 53, 110, 1);
      font-size: 30px;
+ }
+
+ #boton-cerrar-sesion{
+    color: black;
+    background: gray;
+    border: none;
+    border-radius: 20px;
+    width: 150px;
+    height: 35px;
+    align-self: center;
+    margin-top: 5px;
+    margin-right: 6px;
+    font-weight: bold;  
+ }
+ #boton-cerrar-sesion:hover{
+    color: white;
+    background: linear-gradient(15deg, rgba(252, 53, 110, 1) 50%, rgba(255, 102, 66, 1) 100%);
  }
 
  .contenedorSwipe {
@@ -308,6 +331,16 @@
  }
 
  .tarjeta h2 {
+     position: absolute;
+     bottom: 30px;
+     margin: 20px;
+     color: white;
+     font-size: 20px;
+     border-radius: 5px;
+     z-index: 2;
+ }
+
+ .tarjeta p {
      position: absolute;
      bottom: 30px;
      margin: 20px;
@@ -375,30 +408,34 @@
  }
 
  .indicadores-fotos {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;              /* Ajusta el ancho total de la barra */
-    display: flex;
-    justify-content: space-evenly;   /* Distribución uniforme */
-    gap: 6px;
-    z-index: 2;
-}
+     position: absolute;
+     top: 10px;
+     left: 50%;
+     transform: translateX(-50%);
+     width: 90%;
+     /* Ajusta el ancho total de la barra */
+     display: flex;
+     justify-content: space-evenly;
+     /* Distribución uniforme */
+     gap: 6px;
+     z-index: 2;
+ }
 
-.indicadores-fotos .punto {
-    flex: 1;                         /* Cada barra ocupa espacio disponible */
-    height: 6px;    
-    border: 1px solid gray;
-    transform: scaleY(0.5);                 /* Grosor de las barras */
-    background: #0B0B0D;
-    border-radius: 2px;
-    transition: background 0.3s;
-}
+ .indicadores-fotos .punto {
+     flex: 1;
+     /* Cada barra ocupa espacio disponible */
+     height: 6px;
+     border: 1px solid gray;
+     transform: scaleY(0.5);
+     /* Grosor de las barras */
+     background: #0B0B0D;
+     border-radius: 2px;
+     transition: background 0.3s;
+ }
 
-.indicadores-fotos .punto.activo {
-    background: rgba(255, 255, 255, 1);
-}
+ .indicadores-fotos .punto.activo {
+     background: rgba(255, 255, 255, 1);
+ }
 
 
  .carrusel-tarjeta .prev-foto {
@@ -635,7 +672,7 @@
      border-bottom: 1px solid gray;
  }
 
- #btn-volver {
+ #btn-volver-perfil {
      display: flex;
      flex-direction: row;
      align-items: center;
