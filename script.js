@@ -40,23 +40,39 @@ document.addEventListener("DOMContentLoaded", e => {
             // recoger los datos sin espacios
             const nombre = primeraLetraMayuscula(document.getElementById("nombre-registro").value.trim());
             const apellido = primeraLetraMayuscula(document.getElementById("apellido-registro").value.trim());
+            const nickname = document.getElementById("nickname-registro").value.trim();
             const correo = document.getElementById("correo-registro").value.trim();
             const password = document.getElementById("password-registro").value.trim();
-            const fechaNacimiento = document.getElementById("edad-registro").value;
+            const edad = parseInt(document.getElementById("edad-registro").value);
+            const ciudad = document.getElementById("ciudad-registro").value.trim();
+            const fechaNacimiento = document.getElementById("fecha-nacimiento-registro").value;
             const generoUsuario = document.getElementById("genero-registro").value;
 
             // validación de campos para evitar que estén vacios
-            if (!nombre || !apellido || !correo || !password) {
-                alert("Por favor completa todos los campos.");
+            if (!nombre || !apellido || !nickname || !correo || !password || !edad || !ciudad) {
+                    alert("Por favor completa todos los campos.");
+                return;
+            }
+
+            if (nickname.length < 3) {
+                alert("El apodo debe tener al menos 3 caracteres.");
+                return;
+            }
+
+            if (edad < 18 || edad > 120) {
+                alert("La edad debe estar entre 18 y 120 años.");
                 return;
             }
 
             // se recibe el json con todos los datos, incluso los que no necesitemos
             const usuario = {
+                nickname,
                 nombre,
                 apellido,
                 correo,
                 password,
+                edad,
+                ciudad,
                 fechaNacimiento,
                 generoUsuario,
             };
@@ -64,7 +80,7 @@ document.addEventListener("DOMContentLoaded", e => {
             console.log("Enviando:", usuario);
 
             try {
-                const response = await fetch("http://localhost:8080/api/usuario", {
+                const response = await fetch("http://localhost:8090/api/usuario", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(usuario)
@@ -106,7 +122,7 @@ document.addEventListener("DOMContentLoaded", e => {
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
-                const respuesta = await fetch(`http://localhost:8080/api/usuario/correo/${correoLogin}`);
+                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${correoLogin}`);
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
@@ -211,7 +227,7 @@ document.addEventListener("DOMContentLoaded", e => {
         // ---- Fotos ----
         async function cargarFotosUsuario(idUsuario) {
             try {
-                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                const res = await fetch(`http://localhost:8090/api/foto/usuario/${idUsuario}`);
                 const fotosBD = await res.json();
                 fotos.fill(null);
                 fotosBD.forEach(f => {
@@ -220,7 +236,7 @@ document.addEventListener("DOMContentLoaded", e => {
                     const preview = cont.querySelector(".preview");
                     const icono = cont.querySelector(".icono-subir");
                     const eliminar = cont.querySelector(".eliminar-foto");
-                    preview.src = "http://localhost:8080/api/foto/archivo/" + encodeURIComponent(f.url);
+                    preview.src = "http://localhost:8090/api/foto/archivo/" + encodeURIComponent(f.url);
                     preview.style.display = "block";
                     icono.style.display = "none";
                     eliminar.style.display = "block";
@@ -264,11 +280,11 @@ document.addEventListener("DOMContentLoaded", e => {
             const idUsuario = localStorage.getItem("idUsuario");
             const imgBtnPerfil = document.querySelector("#btn-foto-perfil img");
             try {
-                const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                const res = await fetch(`http://localhost:8090/api/foto/usuario/${idUsuario}`);
                 const fotos = await res.json();
                 if (fotos.length > 0) {
                     const urlFoto = fotos[0].url;
-                    imgBtnPerfil.src = `http://localhost:8080/api/foto/archivo/${encodeURIComponent(urlFoto)}`;
+                    imgBtnPerfil.src = `http://localhost:8090/api/foto/archivo/${encodeURIComponent(urlFoto)}`;
                 } else {
                     imgBtnPerfil.src = "";
                 }
@@ -287,7 +303,7 @@ document.addEventListener("DOMContentLoaded", e => {
             });
             if ([...formData].length === 0) return;
             try {
-                const response = await fetch(`http://localhost:8080/api/foto/subir/${usuarioId}`, { method: "POST", body: formData });
+                const response = await fetch(`http://localhost:8090/api/foto/subir/${usuarioId}`, { method: "POST", body: formData });
                 const urls = await response.json();
                 console.log("Fotos subidas:", urls);
             } catch (err) {
@@ -298,7 +314,7 @@ document.addEventListener("DOMContentLoaded", e => {
         // ---- Tarjetas ----
         async function cargarTarjetasUsuarios(idUsuarioActual) {
             try {
-                const res = await fetch(`http://localhost:8080/api/usuarios/otros/${idUsuarioActual}`);
+                const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuarioActual}`);
                 usuarios = await res.json();
 
                 // Limpiar contenedor antes de agregar nuevas tarjetas
@@ -331,9 +347,9 @@ document.addEventListener("DOMContentLoaded", e => {
 
             let fotosUsuario = [];
             try {
-                const res = await fetch(`http://localhost:8080/api/foto/usuario/${user.id}`);
+                const res = await fetch(`http://localhost:8090/api/foto/usuario/${user.id}`);
                 const arr = await res.json();
-                fotosUsuario = arr.map(f => `http://localhost:8080/api/foto/archivo/${encodeURIComponent(f.url)}`);
+                fotosUsuario = arr.map(f => `http://localhost:8090/api/foto/archivo/${encodeURIComponent(f.url)}`);
             } catch (e) {
                 console.error("Error cargando fotos de usuario:", e);
             }
@@ -375,7 +391,7 @@ document.addEventListener("DOMContentLoaded", e => {
             eliminar.addEventListener("click", async e => {
                 e.stopPropagation();
                 const idFoto = c.dataset.idFoto;
-                if (idFoto) await fetch(`http://localhost:8080/api/foto/${idFoto}`, { method: "DELETE" });
+                if (idFoto) await fetch(`http://localhost:8090/api/foto/${idFoto}`, { method: "DELETE" });
                 fotos[index] = null;
                 c.dataset.idFoto = "";
                 renderGrid();
@@ -397,9 +413,9 @@ document.addEventListener("DOMContentLoaded", e => {
                 btnFoto.src = URL.createObjectURL(primera);
             } else if (primera === "EXISTE_EN_BD") {
                 try {
-                    const res = await fetch(`http://localhost:8080/api/foto/usuario/${idUsuario}`);
+                    const res = await fetch(`http://localhost:8090/api/foto/usuario/${idUsuario}`);
                     const arr = await res.json();
-                    if (arr.length > 0) btnFoto.src = `http://localhost:8080/api/foto/archivo/${encodeURIComponent(arr[0].url)}`;
+                    if (arr.length > 0) btnFoto.src = `http://localhost:8090/api/foto/archivo/${encodeURIComponent(arr[0].url)}`;
                 } catch (e) {
                     console.error("Error cargando foto de perfil:", e);
                     btnFoto.src = "";
