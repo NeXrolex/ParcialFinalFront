@@ -18,6 +18,15 @@ document.addEventListener("DOMContentLoaded", e => {
         });
     };
 
+    function calcularEdad(fechaNacimiento) {
+        const hoy = new Date();
+        const nacimiento = new Date(fechaNacimiento);
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const m = hoy.getMonth() - nacimiento.getMonth();
+        if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+        return edad;
+    }
+
     if (document.body.classList.contains("registro")) {
 
         const botonRegistro = document.getElementById("boton-enviar-registro");
@@ -29,9 +38,7 @@ document.addEventListener("DOMContentLoaded", e => {
 
         function primeraLetraMayuscula(texto) {
             if (!texto) return "";
-            console.log("Texto antes:", texto);
             const resultado = texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
-            console.log("Texto después:", resultado);
             return resultado;
         }
 
@@ -42,18 +49,19 @@ document.addEventListener("DOMContentLoaded", e => {
             const apellido = primeraLetraMayuscula(document.getElementById("apellido-registro").value.trim());
             const correo = document.getElementById("correo-registro").value.trim();
             const password = document.getElementById("password-registro").value.trim();
-            const ciudad = document.getElementById("ciudad-registro").value.trim();
             const fechaNacimiento = document.getElementById("fecha-nacimiento-registro").value;
             const generoUsuario = document.getElementById("genero-registro").value;
 
 
             // validación de campos para evitar que estén vacios
-            if (!nombre || !apellido || !correo || !password || !edad || !ciudad) {
+            if (!nombre || !apellido || !correo || !password || !fechaNacimiento) {
                 alert("Por favor completa todos los campos.");
                 return;
             }
 
-            if (edad < 18 || edad > 120) {
+            const edadForm = calcularEdad(fechaNacimiento);
+
+            if (edadForm < 18 || edadForm > 120) {
                 alert("La edad debe estar entre 18 y 120 años.");
                 return;
             }
@@ -66,13 +74,15 @@ document.addEventListener("DOMContentLoaded", e => {
                 apellido,
                 correo,
                 password,
-                ciudad,
+                edad: edadForm,
+                ciudad: "Sin especificar",
                 fechaNacimiento,
                 generoUsuario,
-                fechaRegistro,
+                descripcion: "Hola, soy nuevo en la app.",
+                latitud: null,
+                longitud: null,
+                fechaRegistro
             };
-
-            console.log("Enviando:", usuario);
 
             try {
                 const response = await fetch("http://localhost:8090/api/usuario", {
@@ -117,7 +127,8 @@ document.addEventListener("DOMContentLoaded", e => {
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
-                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${correoLogin}`);
+                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${encodeURIComponent(correoLogin)}`);
+
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
@@ -188,14 +199,6 @@ document.addEventListener("DOMContentLoaded", e => {
         // ===================
 
         // ---- Perfil ----
-        function calcularEdad(fechaNacimiento) {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const m = hoy.getMonth() - nacimiento.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-            return edad;
-        }
 
         function mostrarNombreEdad() {
             const nombre = localStorage.getItem("nombre");
@@ -308,9 +311,9 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
         // ---- Tarjetas ----
-        async function cargarTarjetasUsuarios(idUsuarioActual) {
+        async function cargarTarjetasUsuarios(idUsuario) {
             try {
-                const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuarioActual}`);
+                const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuario}`);
                 usuarios = await res.json();
 
                 const latA = parseFloat(localStorage.getItem("latActual"));
@@ -321,8 +324,8 @@ document.addEventListener("DOMContentLoaded", e => {
                 usuarios.forEach((user, index) => {
 
                     // Calcular distancia si el usuario tiene lat/lon guardados
-                    if (user.lat != null && user.lon != null) {
-                        user.distanciaKm = calcularDistancia(latA, lonA, user.lat, user.lon);
+                    if (user.latitud != null && user.longitud != null) {
+                        user.distanciaKm = calcularDistancia(latA, lonA, user.latitud, user.longitud);
                     } else {
                         user.distanciaKm = null;
                     }
@@ -435,7 +438,7 @@ document.addEventListener("DOMContentLoaded", e => {
             if (e.target.closest("#boton-matches")) { mostrarPanel(panelMatches); cambiarIconos("matches"); }
             if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
             if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
-            if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
+            if (e.target.closest("#btn-volver-perfil")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
             if (e.target.closest(".contenedorSwipe")) {
@@ -480,6 +483,7 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarFotoPerfil();
         actualizarFotoPerfil();
         cargarTarjetasUsuarios(idUsuario);
+        obtenerUbicacionUsuarioActual();
 
 
         // ---- Movimiento de tarjetas ----
@@ -505,12 +509,14 @@ document.addEventListener("DOMContentLoaded", e => {
             div.innerHTML = `
         <div class="carrusel-tarjeta">
             <div class="indicadores-fotos"></div>
-            <img class="foto-activa" src="" alt="Foto usuario" />
+            <img class="foto-activa"/>
         </div>
+        <div id="datos-tarjeta">
         <h2>${user.nombre}, ${calcularEdad(user.fechaNacimiento)}.</h2>
-        <p>Vive en ${user.ciudad}.</p>
-        <p>A ${user.distanciaKm} km de distancia.</p>
-        <p>${fechaUnion}</p>
+            <p>Vive en ${user.ciudad}.</p>
+            <p>A ${user.distanciaKm} km de distancia.</p>
+            <p>${fechaUnion}</p>
+        </div>
     `;
             return div;
         }
