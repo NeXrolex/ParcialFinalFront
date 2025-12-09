@@ -1,23 +1,31 @@
+//Espera a que todo el html este cargado antes de iniciar l js
 document.addEventListener("DOMContentLoaded", e => {
 
+    // =========================================================
+    //  SECCIÓN: PÁGINA INDEX (pantalla de inicio)
+    // =========================================================
     if (document.body.classList.contains("index")) {
 
-
+        // Botones de la página index
         let botonIniciarSesionIndex = document.getElementById("btn-iniciarsesion-index");
         let botonCrearCuentaIndex = document.getElementById("btn-crearcuenta-index");
 
+        // Delegación de eventos: escucha clicks en todo el documento
         document.addEventListener("click", e => {
 
+            // Si el usuario hace click en "Crear cuenta", redirige a registro
             if (e.target === botonCrearCuentaIndex) {
                 window.location.href = "registro.html";
             }
 
+            // Si hace click en "Iniciar sesión", redirige a login
             if (e.target === botonIniciarSesionIndex) {
                 window.location.href = "login.html";
             }
         });
     };
 
+<<<<<<< HEAD
     function calcularEdad(fechaNacimiento) {
         const hoy = new Date();
         const nacimiento = new Date(fechaNacimiento);
@@ -27,21 +35,36 @@ document.addEventListener("DOMContentLoaded", e => {
         return edad;
     }
 
+=======
+    // =========================================================
+    //  SECCIÓN: PÁGINA REGISTRO
+    // =========================================================
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
     if (document.body.classList.contains("registro")) {
 
+        // Botón de envío del formulario de registro
         const botonRegistro = document.getElementById("boton-enviar-registro");
 
+        // Al hacer click en el botón se valida el registro
         botonRegistro.addEventListener("click", e => {
-            e.preventDefault();
-            validarRegistro();
+            e.preventDefault();// Evita que el formulario se envíe de forma tradicional
+            validarRegistro();// Llama a la función que valida y envía los datos
         });
 
+        /**
+         * Convierte la primera letra en mayúscula y el resto en minúscula.
+         * Sirve para normalizar nombre y apellido.
+         */
         function primeraLetraMayuscula(texto) {
             if (!texto) return "";
             const resultado = texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
             return resultado;
         }
 
+        /**
+         * Valida los datos del formulario de registro y, si todo está bien,
+         * construye un objeto usuario y lo envía al backend con fetch (POST).
+         */
         async function validarRegistro() {
 
             // recoger los datos sin espacios
@@ -59,13 +82,19 @@ document.addEventListener("DOMContentLoaded", e => {
                 return;
             }
 
+<<<<<<< HEAD
             const edadForm = calcularEdad(fechaNacimiento);
 
             if (edadForm < 18 || edadForm > 120) {
+=======
+            // Validación de rango de edad permitido
+            if (edad < 18 || edad > 120) {
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
                 alert("La edad debe estar entre 18 y 120 años.");
                 return;
             }
 
+            // Fecha de registro actual en formato ISO
             const fechaRegistro = new Date().toISOString();
 
             // se recibe el json con todos los datos, incluso los que no necesitemos
@@ -85,18 +114,22 @@ document.addEventListener("DOMContentLoaded", e => {
             };
 
             try {
+                // Llamada a la API REST para crear usuario
                 const response = await fetch("http://localhost:8090/api/usuario", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(usuario)
                 });
 
+                // Si la respuesta no es OK, mostramos error
                 if (!response.ok) {
                     alert("Error al crear usuario");
                     return;
                 }
 
+                // Convertir la respuesta a JSON (usuario creado con su id)
                 const data = await response.json();
+                // Guardar datos importantes en localStorage para usarlos después
                 localStorage.setItem("idUsuario", data.id);
                 localStorage.setItem("nombre", data.nombre);
                 localStorage.setItem("apellido", data.apellido);
@@ -104,6 +137,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 localStorage.setItem("password", data.password);
                 localStorage.setItem("fechaNacimiento", data.fechaNacimiento);
                 localStorage.setItem("generoUsuario", data.generoUsuario);
+                // Redirigir al index
                 window.location.href = "index.html";
 
             } catch (error) {
@@ -112,23 +146,38 @@ document.addEventListener("DOMContentLoaded", e => {
         }
     }
 
-
+    // =========================================================
+    //  SECCIÓN: PÁGINA LOGIN
+    // =========================================================
     if (document.body.classList.contains("login")) {
+        // Botón de "Iniciar sesión" en la pantalla de login
         let botonEntrarPrincipal = document.getElementById("boton-entrar-principal");
+        // Delegación de eventos para manejar el click
         document.addEventListener("click", e => {
             if (e.target === botonEntrarPrincipal) {
                 e.preventDefault();
-                validarLogin();
+                validarLogin();// Llamar a la función de validación de login
             }
         });
 
+        /**
+         * Valida las credenciales de login contra la API:
+         *  - busca el usuario por correo
+         *  - verifica la contraseña
+         *  - si es correcto, guarda datos en localStorage y navega a principal.html
+         */
         async function validarLogin() {
             const correoLogin = document.getElementById("correo-login").value;
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
+<<<<<<< HEAD
                 const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${encodeURIComponent(correoLogin)}`);
 
+=======
+                // Petición al backend para obtener usuario por correo
+                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${correoLogin}`);
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
@@ -143,15 +192,18 @@ document.addEventListener("DOMContentLoaded", e => {
                     return;
                 }
 
+                // Parsear el JSON manualmente
                 const usuario = JSON.parse(texto);
                 console.log(usuario);
 
                 // Validar clave
                 if (usuario.password === passwordLogin) {
+                    // Guardar datos básicos en localStorage
                     localStorage.setItem("idUsuario", usuario.id);
                     localStorage.setItem("nombre", usuario.nombre);
                     localStorage.setItem("correo", usuario.correo);
                     localStorage.setItem("fechaNacimiento", usuario.fechaNacimiento);
+                    // Redirigir a la pantalla principal de la app
                     window.location.href = "principal.html";
                 } else {
                     alert("Contraseña incorrecta");
@@ -166,17 +218,20 @@ document.addEventListener("DOMContentLoaded", e => {
 
     }
 
+    // =========================================================
+    //  SECCIÓN: PÁGINA PRINCIPAL (swipe, matches, perfil, fotos, etc.)
+    // =========================================================
     if (document.body.classList.contains("principal")) {
 
         // ===================
         // Variables globales
         // ===================
-        const idUsuario = localStorage.getItem("idUsuario");
-        const fotos = Array(9).fill(null);
-        let usuarios = [];
-        let indexUsuarioActual = 0;
+        const idUsuario = localStorage.getItem("idUsuario");// id del usuario logueado
+        const fotos = Array(9).fill(null);// Array de 9 slots para fotos de perfil
+        let usuarios = [];// Lista de usuarios para las tarjetas
+        let indexUsuarioActual = 0;// Índice actual de usuario
 
-        // Paneles y botones
+        // Referencias a paneles y botones de navegación
         const panelHogar = document.querySelector(".hogar");
         const panelMatches = document.querySelector(".matches");
         const panelPerfil = document.querySelector(".perfil");
@@ -198,8 +253,26 @@ document.addEventListener("DOMContentLoaded", e => {
         // FUNCIONES
         // ===================
 
+<<<<<<< HEAD
         // ---- Perfil ----
+=======
+        /**
+         * Calcula edad a partir de una fecha de nacimiento YYYY-MM-DD.
+         */
+        function calcularEdad(fechaNacimiento) {
+            const hoy = new Date();
+            const nacimiento = new Date(fechaNacimiento);
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+            const m = hoy.getMonth() - nacimiento.getMonth();
+            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
+            return edad;
+        }
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
 
+        /**
+         * Muestra en el panel de perfil algo como: "Alex, 20."
+         * usando datos guardados en localStorage.
+         */
         function mostrarNombreEdad() {
             const nombre = localStorage.getItem("nombre");
             const fechaNacimiento = localStorage.getItem("fechaNacimiento");
@@ -208,12 +281,18 @@ document.addEventListener("DOMContentLoaded", e => {
             document.getElementById("nombre-edad-perfil").textContent = `${nombre}, ${edad}.`;
         }
 
-        // ---- Navegación de paneles ----
+        /**
+         * Muestra solo el panel indicado y oculta el resto.
+         */
         function mostrarPanel(panel) {
             [panelHogar, panelMatches, panelPerfil, editarPerfil].forEach(p => p.classList.add("oculto"));
             panel.classList.remove("oculto");
         }
 
+        /**
+         * Cambia los iconos del footer según el panel seleccionado.
+         * Usa imágenes a color para el activo y grises para los demás.
+         */
         function cambiarIconos(seleccion) {
             const estados = {
                 hogar: ["imgs/iconotindercolor.png", "imgs/iconomatches.png", "imgs/iconoperfil.png"],
@@ -222,31 +301,45 @@ document.addEventListener("DOMContentLoaded", e => {
             };
             [imgHogar, imgMatches, imgPerfil].forEach((img, i) => img.src = estados[seleccion][i]);
         }
+        // =====================================================
+        //  MANEJO DE FOTOS DE PERFIL
+        // =====================================================
 
-        // ---- Fotos ----
+        /**
+         * Carga desde el backend las fotos del usuario actual
+         * y las ubica en el grid de 9 posiciones.
+         */
         async function cargarFotosUsuario(idUsuario) {
             try {
                 const res = await fetch(`http://localhost:8090/api/foto/usuario/${idUsuario}`);
                 const fotosBD = await res.json();
-                fotos.fill(null);
+                fotos.fill(null);// Reinicia el array local
+
                 fotosBD.forEach(f => {
-                    const cont = contenedoresFotos[f.orden];
+                    const cont = contenedoresFotos[f.orden];// Usa el campo "orden" para saber en qué slot va
                     if (!cont) return;
                     const preview = cont.querySelector(".preview");
                     const icono = cont.querySelector(".icono-subir");
                     const eliminar = cont.querySelector(".eliminar-foto");
+                    // URL de la imagen servida por el backend
                     preview.src = "http://localhost:8090/api/foto/archivo/" + encodeURIComponent(f.url);
                     preview.style.display = "block";
                     icono.style.display = "none";
                     eliminar.style.display = "block";
-                    cont.dataset.idFoto = f.id;
-                    fotos[f.orden] = "EXISTE_EN_BD";
+                    cont.dataset.idFoto = f.id;// Guarda el id de la foto en data-idFoto
+                    fotos[f.orden] = "EXISTE_EN_BD";// Marca que en esa posición hay foto en BD
                 });
             } catch (e) {
                 console.error("Error cargando fotos:", e);
             }
         }
 
+        /**
+         * Dibuja el grid de fotos según el array "fotos":
+         *  - Si hay File: muestra preview local
+         *  - Si hay "EXISTE_EN_BD": deja la imagen actual del backend
+         *  - Si hay null: muestra ícono de subir y borde punteado
+         */
         function renderGrid() {
             contenedoresFotos.forEach((c, index) => {
                 const preview = c.querySelector(".preview");
@@ -261,11 +354,13 @@ document.addEventListener("DOMContentLoaded", e => {
                     eliminar.style.display = "block";
                     c.style.border = "none";
                 } else if (foto === "EXISTE_EN_BD") {
+                    // La foto existe en base de datos, ya se cargó antes
                     preview.style.display = "block";
                     icono.style.display = "none";
                     eliminar.style.display = "block";
                     c.style.border = "none";
                 } else {
+                    // Slot vacío
                     preview.src = "";
                     preview.style.display = "none";
                     icono.style.display = "block";
@@ -275,6 +370,10 @@ document.addEventListener("DOMContentLoaded", e => {
             });
         }
 
+        /**
+         * Carga la foto principal del botón circular de perfil
+         * (usa la primera que encuentre para el usuario).
+         */
         async function cargarFotoPerfil() {
             const idUsuario = localStorage.getItem("idUsuario");
             const imgBtnPerfil = document.querySelector("#btn-foto-perfil img");
@@ -292,6 +391,10 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+        /**
+         * Envía al backend todas las fotos nuevas seleccionadas (File)
+         * usando FormData y un endpoint de tipo multipart/form-data.
+         */
         async function enviarFotosAPI(usuarioId) {
             const formData = new FormData();
             fotos.forEach((file, index) => {
@@ -300,6 +403,7 @@ document.addEventListener("DOMContentLoaded", e => {
                     formData.append("orden", index);
                 }
             });
+            // Si no hay fotos nuevas, no llama al backend
             if ([...formData].length === 0) return;
             try {
                 const response = await fetch(`http://localhost:8090/api/foto/subir/${usuarioId}`, { method: "POST", body: formData });
@@ -310,8 +414,21 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+<<<<<<< HEAD
         // ---- Tarjetas ----
         async function cargarTarjetasUsuarios(idUsuario) {
+=======
+        // =====================================================
+        //  TARJETAS DE USUARIOS PARA SWIPE
+        // =====================================================
+
+        /**
+         * Pide al backend la lista de usuarios distintos al actual
+         * y genera tarjetas (div.tarjeta) para cada uno.
+         * También calcula la distancia entre usuarios usando la lat/lon.
+         */
+        async function cargarTarjetasUsuarios(idUsuarioActual) {
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             try {
                 const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuario}`);
                 usuarios = await res.json();
@@ -319,6 +436,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 const latA = parseFloat(localStorage.getItem("latActual"));
                 const lonA = parseFloat(localStorage.getItem("lonActual"));
 
+                // Limpia el contenedor de swipe
                 contenedorSwipe.innerHTML = "";
 
                 usuarios.forEach((user, index) => {
@@ -329,9 +447,10 @@ document.addEventListener("DOMContentLoaded", e => {
                     } else {
                         user.distanciaKm = null;
                     }
-
+                    // Crear la tarjeta para este usuario   
                     const card = crearTarjeta(user);
 
+                    // Asignar clases según la posición (top, next, back)
                     if (index === 0) card.classList.add("card-top");
                     else if (index === 1) {
                         card.classList.add("card-next");
@@ -341,6 +460,7 @@ document.addEventListener("DOMContentLoaded", e => {
                     contenedorSwipe.appendChild(card);
                 });
 
+                // Rellenar cada tarjeta con las fotos del usuario correspondiente
                 for (let i = 0; i < usuarios.length; i++) {
                     await llenarTarjetaUsuario(i);
                 }
@@ -349,7 +469,10 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
-
+        /**
+         * Para una posición dada en el array "usuarios", pide sus fotos
+         * al backend y las relaciona con la tarjeta correspondiente.
+         */
         async function llenarTarjetaUsuario(pos) {
             if (pos >= usuarios.length) return;
             const user = usuarios[pos];
@@ -367,39 +490,48 @@ document.addEventListener("DOMContentLoaded", e => {
             if (pos >= tarjetas.length) return;
             const card = tarjetas[pos];
 
+            // Guardar lista de URLs en data-fotos para manejar el carrusel
             card.dataset.fotos = JSON.stringify(fotosUsuario);
             const img = card.querySelector(".foto-activa");
             if (fotosUsuario.length > 0) img.src = fotosUsuario[0];
 
+            // Actualizar los indicadores de puntos (carrusel)
             actualizarIndicadores(card);
         }
 
 
 
-        // ===================
-        // EVENTOS
-        // ===================
+        // =====================================================
+        //  EVENTOS DE GRID DE FOTOS: SUBIR Y ELIMINAR
+        // =====================================================
+
         contenedoresFotos.forEach((c, index) => {
             const input = c.querySelector("input[type='file']");
+            // Al seleccionar un archivo en un slot
             input.addEventListener("change", async e => {
                 const file = e.target.files[0];
                 if (!file) return;
+                // Busca la primera posición libre en el array fotos
                 const posicion = fotos.findIndex(f => f === null);
                 if (posicion === -1) {
                     alert("Máximo 9 fotos");
                     input.value = "";
                     return;
                 }
+                // Se guarda el File en el array y se actualiza la vista
                 fotos[posicion] = file;
                 renderGrid();
                 actualizarFotoPerfil();
                 input.value = "";
+                // Enviar al backend
                 await enviarFotosAPI(idUsuario);
             });
             const eliminar = c.querySelector(".eliminar-foto");
+            // Al hacer click en el ícono de eliminar
             eliminar.addEventListener("click", async e => {
                 e.stopPropagation();
                 const idFoto = c.dataset.idFoto;
+                // Si la foto existe en BD, la borra también en el backend
                 if (idFoto) await fetch(`http://localhost:8090/api/foto/${idFoto}`, { method: "DELETE" });
                 fotos[index] = null;
                 c.dataset.idFoto = "";
@@ -409,8 +541,13 @@ document.addEventListener("DOMContentLoaded", e => {
             });
         });
 
+        /**
+         * Actualiza la imagen redonda de perfil con la primera foto disponible
+         * (ya sea una File local o una foto existente en BD).
+         */
         async function actualizarFotoPerfil() {
             const btnFoto = document.querySelector("#btn-foto-perfil img");
+
             // Buscar primera foto válida en el array
             const primera = fotos.find(f => f instanceof File || f === "EXISTE_EN_BD");
             if (!primera) {
@@ -418,9 +555,11 @@ document.addEventListener("DOMContentLoaded", e => {
                 return;
             }
 
+            // Si es un File, se usa URL local
             if (primera instanceof File) {
                 btnFoto.src = URL.createObjectURL(primera);
             } else if (primera === "EXISTE_EN_BD") {
+                // Si la foto es de BD, se pide al backend la primera foto
                 try {
                     const res = await fetch(`http://localhost:8090/api/foto/usuario/${idUsuario}`);
                     const arr = await res.json();
@@ -432,15 +571,27 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+        // =====================================================
+        //  EVENTOS GENERALES DE LA PANTALLA PRINCIPAL
+        // =====================================================
 
         document.addEventListener("click", e => {
+            // Navegación del footer
             if (e.target.closest("#boton-hogar")) { mostrarPanel(panelHogar); cambiarIconos("hogar"); }
             if (e.target.closest("#boton-matches")) { mostrarPanel(panelMatches); cambiarIconos("matches"); }
             if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
+            // Botón "Editar perfil"
             if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
+<<<<<<< HEAD
             if (e.target.closest("#btn-volver-perfil")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
+=======
+            // Botón "Volver" desde la edición de perfil
+            if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
+            // Botón like / dislike (mueven la tarjeta hacia un lado)
+>>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
+            // Click en el área de tarjetas (para cambiar de foto dentro del carrusel)
             if (e.target.closest(".contenedorSwipe")) {
                 const card = e.target.closest(".tarjeta");
                 if (!card) return;
@@ -464,6 +615,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 card.querySelector(".foto-activa").src = fotos[index];
                 actualizarIndicadores(card);
             }
+            // Botón "Cerrar sesión"
             if (e.target === botonCerrarSesion) {
                 localStorage.removeItem("idUsuario");
                 localStorage.removeItem("nombre");
@@ -474,9 +626,9 @@ document.addEventListener("DOMContentLoaded", e => {
 
         });
 
-        // ===================
-        // INIT
-        // ===================
+        // =====================================================
+        //  INICIALIZACIÓN DE LA PANTALLA PRINCIPAL
+        // =====================================================
 
         mostrarNombreEdad();
         cargarFotosUsuario(idUsuario);
@@ -485,18 +637,26 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarTarjetasUsuarios(idUsuario);
         obtenerUbicacionUsuarioActual();
 
+        // =====================================================
+        //  LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
+        // =====================================================
 
-        // ---- Movimiento de tarjetas ----
-        const UMBRAL = 150;
-        const limiteY = 25;
+
+        const UMBRAL = 150; // Distancia en X a partir de la cual se considera un swipe
+        const limiteY = 25;// Movimiento máximo vertical permitido
         let arrastrando = false;
         let inicioX = 0, inicioY = 0;
         let deltaInicialX = null;
         let movXGlobal = 0;
 
+        // Eventos para ratón y táctil
         contenedorSwipe.addEventListener("mousedown", iniciarArrastre);
         contenedorSwipe.addEventListener("touchstart", iniciarArrastre, { passive: true });
 
+        /**
+         * Crea un elemento div.tarjeta con la información básica del usuario
+         * (nombre, ciudad, distancia, fecha de unión).
+         */
         function crearTarjeta(user) {
             const div = document.createElement("div");
             div.className = "tarjeta";
@@ -521,6 +681,10 @@ document.addEventListener("DOMContentLoaded", e => {
             return div;
         }
 
+        /**
+         * Formatea la fecha de registro en un texto legible:
+         * "Se unió el 5 de marzo del 2024."
+         */
         function formatearFechaUnion(fecha) {
             const meses = [
                 "enero", "febrero", "marzo", "abril", "mayo", "junio",
@@ -536,7 +700,10 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
 
-
+        /**
+         * Dibuja los puntos de indicador para el carrusel de fotos
+         * y marca cuál es la foto activa.
+         */
         function actualizarIndicadores(card) {
             const fotos = JSON.parse(card.dataset.fotos || "[]");
             const index = parseInt(card.dataset.indexFoto || 0);
@@ -547,17 +714,24 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
 
-
+        /**
+         * Normaliza el evento de ratón/táctil, devolviendo el punto con clientX/Y.
+         */
         function obtenerPunto(e) {
             if (e.touches && e.touches.length > 0) return e.touches[0];
             return e;
         }
 
+        /**
+         * Comienza el arrastre de la tarjeta superior (card-top).
+         * Solo se inicia si el usuario hace click dentro de la tarjeta.
+         */
         function iniciarArrastre(e) {
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
             const p = obtenerPunto(e);
             const rect = cardTop.getBoundingClientRect();
+            // Verifica que el click haya sido dentro de la tarjeta
             if (!(p.clientX >= rect.left && p.clientX <= rect.right && p.clientY >= rect.top && p.clientY <= rect.bottom)) return;
             arrastrando = true;
             inicioX = p.clientX;
@@ -565,17 +739,23 @@ document.addEventListener("DOMContentLoaded", e => {
             deltaInicialX = null;
             movXGlobal = 0;
             cardTop.style.transition = "none";
+            // Se escuchan movimientos y fin de arrastre a nivel documento
             document.addEventListener("mousemove", alMover);
             document.addEventListener("touchmove", alMover, { passive: false });
             document.addEventListener("mouseup", finMover);
             document.addEventListener("touchend", finMover);
         }
 
+        /**
+         * Maneja el movimiento mientras se arrastra la tarjeta.
+         * Aplica una especie de "resistencia" para que el movimiento sea suave.
+         */
         function alMover(e) {
             if (!arrastrando) return;
             const p = obtenerPunto(e);
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
+            // En móvil, si el movimiento es más horizontal que vertical, se evita el scroll
             if (e.type === "touchmove") {
                 const dy = Math.abs(p.clientY - inicioY);
                 const dx = Math.abs(p.clientX - inicioX);
@@ -585,12 +765,15 @@ document.addEventListener("DOMContentLoaded", e => {
             let cambioY = p.clientY - inicioY;
             if (deltaInicialX === null) deltaInicialX = cambioX;
             cambioX -= deltaInicialX;
+            // Resistencia exponencial para que cueste más mover mucho
             const resistencia = 1 - Math.exp(-Math.abs(cambioX) / 150);
             const movX = cambioX * resistencia;
             const movY = Math.max(Math.min(cambioY * 0.15, limiteY), -limiteY);
             movXGlobal = movX;
             const rotacion = movX / -20;
+            // Transformación principal de la tarjeta
             cardTop.style.transform = `translate(${movX}px, ${movY}px) rotate(${rotacion}deg)`;
+            // Tarjeta siguiente se va acercando conforme se arrastra la superior
             const next = document.querySelector(".card-next");
             if (next) {
                 const progreso = Math.min(Math.abs(movX) / UMBRAL, 1);
@@ -600,6 +783,10 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+        /**
+         * Se llama cuando el usuario suelta el mouse o el dedo.
+         * Decide si la tarjeta vuelve al centro o se va hacia un lado (like/dislike).
+         */
         function finMover() {
             if (!arrastrando) return;
             arrastrando = false;
@@ -610,22 +797,30 @@ document.addEventListener("DOMContentLoaded", e => {
             if (movXGlobal > UMBRAL) direccion = 1;
             if (movXGlobal < -UMBRAL) direccion = -1;
             if (direccion !== 0) {
+                // La tarjeta se va hacia la derecha (like) o izquierda (dislike)
                 cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
                 setTimeout(() => {
-                    cardTop.remove();
-                    promoverTarjetas();
+                    cardTop.remove();// Se elimina la tarjeta
+                    promoverTarjetas();// La siguiente se convierte en card-top
                 }, 420);
             } else {
+                // Vuelve al centro si no pasó el umbral
                 cardTop.style.transform = "translate(0px, 0px) rotate(0deg)";
                 const next = document.querySelector(".card-next");
                 if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
             }
+            // Limpia listeners globales
             document.removeEventListener("mousemove", alMover);
             document.removeEventListener("touchmove", alMover);
             document.removeEventListener("mouseup", finMover);
             document.removeEventListener("touchend", finMover);
         }
 
+        /**
+         * Promueve las tarjetas:
+         *  - card-next pasa a ser card-top
+         *  - card-back pasa a ser card-next
+         */
         function promoverTarjetas() {
             const next = document.querySelector(".card-next");
             const back = document.querySelector(".card-back");
@@ -633,6 +828,7 @@ document.addEventListener("DOMContentLoaded", e => {
                 next.classList.remove("card-next");
                 next.classList.add("card-top");
                 next.style.transition = "transform .35s ease";
+                // Truco con requestAnimationFrame para asegurar animación
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         next.style.transform = "translate(0px,0px) rotate(0deg)";
@@ -647,6 +843,10 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+        /**
+         * Mueve la tarjeta top directamente hacia un lado,
+         * se usa cuando el usuario pulsa los botones like/dislike.
+         */
         function moverTarjeta(direccion) {
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
@@ -656,7 +856,14 @@ document.addEventListener("DOMContentLoaded", e => {
             const next = document.querySelector(".card-next");
             if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
         }
+        // =====================================================
+        //  UBICACIÓN DEL USUARIO Y DISTANCIAS
+        // =====================================================
 
+        /**
+         * Obtiene la ubicación actual del usuario (lat/lon)
+         * y la guarda en localStorage y en el backend.
+         */
         function obtenerUbicacionUsuarioActual() {
             navigator.geolocation.getCurrentPosition(
                 pos => {
@@ -674,7 +881,9 @@ document.addEventListener("DOMContentLoaded", e => {
             );
         }
 
-
+        /**
+         * Envía al backend la ubicación actual del usuario logueado.
+         */
         async function enviarUbicacionBack(idUsuario, lat, lon) {
             await fetch(`http://localhost:8080/api/usuarios/ubicacion/${idUsuario}`, {
                 method: "POST",
@@ -683,6 +892,10 @@ document.addEventListener("DOMContentLoaded", e => {
             });
         }
 
+        /**
+         * Calcula la distancia entre dos puntos (lat1, lon1) y (lat2, lon2)
+         * usando la fórmula de Haversine. Devuelve kilómetros.
+         */
         function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371; // radio de la Tierra en km
 
