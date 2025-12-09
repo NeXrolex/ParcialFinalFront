@@ -3,34 +3,47 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Hace que se vea bien en pantallas pequeñas (móviles) -->
         <title>Tinder - Principal</title>
+        <!-- Título en la pestaña del navegador -->
         <link href="styles.css" rel="stylesheet">
-        <link rel="icon" type="image/png" href="imgs/iconoapp.png">
+        <!-- Hoja de estilos con todo el diseño de la página -->
+        <link rel="icon" type="image/png" href="imgs/iconoapp.png">\
+        <!-- Icono que aparece en la pestaña del navegador -->
     </head>
     <body class="principal">
-        <header class="headerPrincipal">
+        <header class="headerPrincipal oculto">
             <h1>
                 <img src="imgs/iconoapp.png" alt="icono de tinder">
+                <!-- Logo de la app -->
                 tinder
             </h1>
         </header>
-        <div class="hogar">
-            <div class="contenedorSwipe"></div>
+        <!-- SECCIÓN HOGAR (pantalla principal de swipes) -->
+        <div class="hogar oculto">
+            <!-- Contenedor de las tarjetas para hacer swipe -->
+            <div class="contenedorSwipe">
+                <div class="tarjeta card-top"></div>
+                <div class="tarjeta card-next"></div>
+            </div>
+
+            <!-- Botones de swipe: dislike, superlike, like -->
             <div class="contenedorBotonesSwap">
                 <button class="botonesMatch" id="btn-dislike">
-                    <img src="imgs/iconoxroja.png" alt="icono de dislike">
+                    <img src="imgs/iconoxroja.png" alt="icono de perfil">
                     <br>
                 </button>
                 <button id="btn-superlike" class="botonesMatch">
-                    <img src="imgs/iconoestrella.png" alt="icono de superlile">
+                    <img src="imgs/iconoestrella.png" alt="icono de perfil">
                     <br>
                 </button>
                 <button class="botonesMatch" id="btn-like">
-                    <img src="imgs/iconocorazonverde.png" alt="icono de like">
+                    <img src="imgs/iconocorazonverde.png" alt="icono de perfil">
                     <br>
                 </button>
             </div>
         </div>
+        <!-- SECCIÓN MATCHES (lista de likes / matches) -->
         <div class="matches oculto">
             <div id="buscador">
                 <img src="imgs/iconolupa.png" alt="icono de lupa">
@@ -38,8 +51,12 @@
             </div>
             <div class="panelLikeMatch">
                 <p>Tus conexiones.</p>
+                <!-- Contenedor de perfiles que te han dado like / tus matches -->
                 <div id="likes">
                     <div class="perfilesLike" id="div-likes"></div>
+                     <!-- aquí JS puede meter tarjetas de "likes" -->
+                    <div class="perfilesLike" id="div-matches"></div>
+                    <div class="perfilesLike" id="div-matches"></div>
                 </div>
                 <p>Personas a las que le has gustado.</p>
                 <div id="matches">
@@ -47,10 +64,12 @@
                 </div>
             </div>
         </div>
+        <!-- SECCIÓN PERFIL (vista del perfil propio) -->
         <div class="perfil oculto">
             <div class="panelPerfil">
                 <button id="btn-foto-perfil">
-                    <img src="">
+                    <img src="" alt="foto de perfil">
+                     <!-- la src se llenará con JS con la foto del usuario -->
                 </button>
                 <p id="nombre-edad-perfil">Nombre, edad.</p>
                 <button id="btn-editar-perfil">
@@ -59,26 +78,34 @@
                 </button>
             </div>
         </div>
+        <!-- SECCIÓN EDITAR PERFIL (panel para cambiar datos y fotos) -->
         <section class="contenedorEditarPerfil">
             <div id="header-editar">
                 <button id="btn-volver">
                     <img src="imgs/iconovolver.png">
                     Editar perfil
+                    <!-- Botón para volver a la pantalla anterior -->
                 </button>
                 <div id="editar-preview">
                     <button class="btnEditar" id="editar-datos">Editar</button>
                     <button class="btnEditar" id="preview-datos">Vista previa</button>
                 </div>
             </div>
-            <div id="datos-editar" oculto>
+            <div id="datos-editar">
                 <h1>Media</h1>
                 <p>Agrega hasta 9 fotos.</p>
                 <div id="contenedor-agregar-fotos">
+                    <!-- Contenedor de los slots para subir fotos -->
                     <div class="contenedorSubirFoto">
+                        <!-- Cada .contenedorSubirFoto es un “slot” para una foto -->
                         <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <!-- icono para indicar que se puede subir foto -->
                         <img class="preview">
+                        <!-- aquí JS pondrá la vista previa de la foto seleccionada -->
                         <input type="file">
+                        <!-- input para seleccionar el archivo desde el PC/celular -->
                         <img class="eliminar-foto" src="imgs/x-icon.png">
+                        <!-- icono para eliminar esa foto -->
                     </div>
                     <div class="contenedorSubirFoto">
                         <img class="icono-subir" src="imgs/iconosubirfoto.png">
@@ -86,6 +113,7 @@
                         <input type="file">
                         <img class="eliminar-foto" src="imgs/x-icon.png">
                     </div>
+                    <!-- Ocho slots más (para completar las 9 fotos máximas) -->
                     <div class="contenedorSubirFoto">
                         <img class="icono-subir" src="imgs/iconosubirfoto.png">
                         <img class="preview">
@@ -131,18 +159,22 @@
                 </div>
             </div>
         </section>
-        <footer class="footerPrincipal">
+        <!-- FOOTER (barra de navegación inferior) -->
+        <footer class="footerPrincipal oculto">
             <div class="contenedorBotonesFooter">
                 <button class="botonesPrincipal" id="boton-hogar">
-                    <img src="imgs/iconotindercolor.png" alt="icono de hogar">
+                    <!-- Botón para ir a la pantalla de swipes (hogar) -->
+                    <img src="imgs/iconotindercolor.png" alt="icono de tinder">
                     <br>
                     Hogar
                 </button>
+                <!-- Botón para ir a la sección de matches -->
                 <button class="botonesPrincipal" id="boton-matches">
                     <img src="imgs/iconomatches.png" alt="icono de matches">
                     <br>
                     Matches
                 </button>
+                <!-- Botón para ir al perfil -->
                 <button class="botonesPrincipal" id="boton-perfil">
                     <img src="imgs/iconoperfil.png" alt="icono de perfil">
                     <br>
@@ -150,6 +182,11 @@
                 </button>
             </div>
         </footer>
+        <!-- Archivo JavaScript con TODA la lógica:
+             - mostrar/ocultar secciones (hogar/matches/perfil)
+             - manejar los botones de like/dislike/superlike
+             - cargar y previsualizar fotos
+             - llamar a la API REST con fetch -->
         <script src="script.js"></script>
     </body>
 </html>

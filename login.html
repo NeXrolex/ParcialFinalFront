@@ -3,35 +3,68 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+         <!-- Hace que la página sea responsive en móviles.
+             width=device-width: usa el ancho del dispositivo.
+             initial-scale=1.0: nivel de zoom inicial. -->
         <title>Tinder - Inicio Sesión</title>
+        <!-- Título que aparece en la pestaña del navegador -->
         <link href="styles.css" rel="stylesheet">
+        <!-- Enlaza la hoja de estilos externa (CSS) que da diseño a la página -->
         <link rel="icon" type="image/png" href="imgs/iconoapp.png">
+        <!-- Icono pequeño que aparece en la pestaña (favicon) -->
     </head>
+    <!-- El contenido visible de la página -->
     <body class="login">
+        <!-- class="login" permite aplicar estilos específicos a esta pantalla en styles.css -->
         <header class="headerLogin">
             <h1>
                 <img src="imgs/tinderblanco.png" alt="icono de tinder"> tinder
             </h1>
             <h2>Bienvenido de vuelta. Tu próxima conexión podría estar a un clic.</h2>
         </header>
+        <!-- Formulario de inicio de sesión -->
         <form class="formLogin">
+            <!-- class="formLogin" se usa en CSS para darle estilos al formulario -->
             <label for="correo-login">correo</label>
+            <!-- Label asociado al input de correo. for="correo-login" debe coincidir con el id del input -->
             <input
                 id="correo-login"
                 type="email"
                 placeholder="Ingresa tu correo"
                 required
             >
+            <!--
+                Input donde el usuario escribe su correo.
+                - id="correo-login": lo usas en JS para leer el valor.
+                - type="email": el navegador valida que tenga formato de correo.
+                - placeholder: texto de ayuda dentro del campo.
+                - required: obliga a que no se pueda enviar vacío.
+            -->
             <label for="password-login">Contraseña</label>
+            <!-- Label para el campo de contraseña -->
             <input
                 id="password-login"
                 type="password"
                 placeholder="Ingresa tu contraseña"
                 required
             >
+            <!--
+                Campo para la contraseña.
+                - type="password": oculta los caracteres mientras se escribe.
+                - id="password-login": lo usas en JS para leer el valor.
+            -->
             <button type="button" id="boton-entrar-principal">Iniciar sesion</button>
+            <!--
+                Botón para iniciar sesión.
+                - type="button": NO envía el formulario por sí solo,
+                  la idea es manejar el clic con JavaScript (fetch a la API).
+                - id="boton-entrar-principal": lo usas en script.js para agregar un eventListener.
+            -->
             <p>¿Olvidaste tu contraseña?</p>
+            <!-- Texto informativo (podrías convertirlo en un enlace a otra página en el futuro) -->
         </form>
         <script src="script.js"></script>
+        <!-- Enlaza el archivo JavaScript que manejará la lógica del login:
+             leer los campos, validar y llamar a la API REST con fetch -->
     </body>
 </html>
