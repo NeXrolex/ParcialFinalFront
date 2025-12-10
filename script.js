@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", e => {
          * construye un objeto usuario y lo envía al backend con fetch (POST).
          */
         async function validarRegistro() {
-
             // recoger los datos sin espacios
             const nombre = primeraLetraMayuscula(document.getElementById("nombre-registro").value.trim());
             const apellido = primeraLetraMayuscula(document.getElementById("apellido-registro").value.trim());
@@ -76,15 +75,16 @@ document.addEventListener("DOMContentLoaded", e => {
             const fechaNacimiento = document.getElementById("fecha-nacimiento-registro").value;
             const generoUsuario = document.getElementById("genero-registro").value;
 
-
             // validación de campos para evitar que estén vacios
-            if (!nombre || !apellido || !correo || !password || !fechaNacimiento) {
+            if (!nombre || !apellido || !correo || !password || !fechaNacimiento || !generoUsuario) {
                 alert("Por favor completa todos los campos.");
                 return;
             }
 
+            // Calcula la edad a partir de la fecha de nacimiento
             const edadForm = calcularEdad(fechaNacimiento);
 
+            // Validación de rango de edad permitido
             if (edadForm < 18 || edadForm > 120) {
                 alert("La edad debe estar entre 18 y 120 años.");
                 return;
@@ -93,8 +93,10 @@ document.addEventListener("DOMContentLoaded", e => {
             // Fecha de registro actual en formato ISO
             const fechaRegistro = new Date().toISOString();
 
-            // se recibe el json con todos los datos, incluso los que no necesitemos
+            // se recibe el json con todos los datos
+            // El nickname será igual al nombre para facilitar las cosas
             const usuario = {
+                nickname: nombre,
                 nombre,
                 apellido,
                 correo,
@@ -104,12 +106,12 @@ document.addEventListener("DOMContentLoaded", e => {
                 fechaNacimiento,
                 generoUsuario,
                 descripcion: "Hola, soy nuevo en la app.",
-                latitud: null,
-                longitud: null,
                 fechaRegistro
             };
 
             try {
+                console.log("Enviando usuario:", usuario);
+
                 // Llamada a la API REST para crear usuario
                 const response = await fetch("http://localhost:8090/api/usuario", {
                     method: "POST",
@@ -117,9 +119,11 @@ document.addEventListener("DOMContentLoaded", e => {
                     body: JSON.stringify(usuario)
                 });
 
-                // Si la respuesta no es OK, mostramos error
+                // Si la respuesta no es OK, mostramos error detallado
                 if (!response.ok) {
-                    alert("Error al crear usuario");
+                    const errorText = await response.text();
+                    console.error("Error del servidor:", response.status, errorText);
+                    alert(`Error al crear usuario:\nCódigo: ${response.status}\nDetalle: ${errorText}`);
                     return;
                 }
 
@@ -138,6 +142,7 @@ document.addEventListener("DOMContentLoaded", e => {
 
             } catch (error) {
                 console.error("Error en el registro:", error);
+                alert("Error de conexión: " + error.message);
             }
         }
     }
@@ -392,26 +397,47 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
-        // ---- Tarjetas ----
-        async function cargarTarjetasUsuarios(idUsuario) {
-            // =====================================================
-            //  TARJETAS DE USUARIOS PARA SWIPE
-            // =====================================================
+        // =====================================================
+        // TARJETAS DE USUARIOS PARA SWIPE
+        // =====================================================
 
-            /**
-             * Pide al backend la lista de usuarios distintos al actual
-             * y genera tarjetas (div.tarjeta) para cada uno.
-             */
+        /**
+         * Pide al backend la lista de usuarios distintos al actual
+         * y genera tarjetas (div.tarjeta) para cada uno.
+         */
+        async function cargarTarjetasUsuarios(idUsuarioActual) {
             try {
-                const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuario}`);
-                usuarios = await res.json();
+                // 1. Obtener todos los usuarios distintos al actual
+                const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuarioActual}`);
+                let todosUsuarios = await res.json();
+
+                // 2. Obtener los swipes que el usuario actual ha hecho
+                const resSwipes = await fetch(
+                    `http://localhost:8090/api/swipe/emisor/${idUsuarioActual}`
+                );
+                const misSwipes = await resSwipes.json();
+
+                // 3. Extraer IDs de usuarios a los que YA hiciste swipe
+                const usuariosConSwipe = misSwipes.map(s => s.idReceptor);
+
+                // 4. FILTRAR: Solo usuarios a los que NO hiciste swipe
+                usuarios = todosUsuarios.filter(user => !usuariosConSwipe.includes(user.id));
+
+                console.log(`Total usuarios: ${todosUsuarios.length}`);
+                console.log(`Ya con swipe: ${usuariosConSwipe.length}`);
+                console.log(`Sin swipe: ${usuarios.length}`);
+
+                // 5. Si no hay más usuarios, mostrar mensaje
+                if (usuarios.length === 0) {
+                    contenedorSwipe.innerHTML = "<p style='text-align:center; margin-top: 50px;'>¡No hay más usuarios! </p>";
+                    return;
+                }
 
                 // Limpia el contenedor de swipe
                 contenedorSwipe.innerHTML = "";
 
                 usuarios.forEach((user, index) => {
-
-                    // Crear la tarjeta para este usuario   
+                    // Crear la tarjeta para este usuario
                     const card = crearTarjeta(user);
 
                     // Asignar clases según la posición (top, next, back)
@@ -429,7 +455,7 @@ document.addEventListener("DOMContentLoaded", e => {
                     await llenarTarjetaUsuario(i);
                 }
             } catch (e) {
-                console.error(e);
+                console.error("Error cargando tarjetas:", e);
             }
         }
 
@@ -439,9 +465,10 @@ document.addEventListener("DOMContentLoaded", e => {
          */
         async function llenarTarjetaUsuario(pos) {
             if (pos >= usuarios.length) return;
-            const user = usuarios[pos];
 
+            const user = usuarios[pos];
             let fotosUsuario = [];
+
             try {
                 const res = await fetch(`http://localhost:8090/api/foto/usuario/${user.id}`);
                 const arr = await res.json();
@@ -487,16 +514,21 @@ document.addEventListener("DOMContentLoaded", e => {
                 renderGrid();
                 actualizarFotoPerfil();
                 input.value = "";
+
                 // Enviar al backend
                 await enviarFotosAPI(idUsuario);
             });
+
             const eliminar = c.querySelector(".eliminar-foto");
+
             // Al hacer click en el ícono de eliminar
             eliminar.addEventListener("click", async e => {
                 e.stopPropagation();
                 const idFoto = c.dataset.idFoto;
+
                 // Si la foto existe en BD, la borra también en el backend
                 if (idFoto) await fetch(`http://localhost:8090/api/foto/${idFoto}`, { method: "DELETE" });
+
                 fotos[index] = null;
                 c.dataset.idFoto = "";
                 renderGrid();
@@ -536,21 +568,43 @@ document.addEventListener("DOMContentLoaded", e => {
         }
 
         // =====================================================
-        //  EVENTOS GENERALES DE LA PANTALLA PRINCIPAL
+        // EVENTOS GENERALES DE LA PANTALLA PRINCIPAL
         // =====================================================
 
         document.addEventListener("click", e => {
             // Navegación del footer
-            if (e.target.closest("#boton-hogar")) { mostrarPanel(panelHogar); cambiarIconos("hogar"); }
-            if (e.target.closest("#boton-matches")) { mostrarPanel(panelMatches); cambiarIconos("matches"); }
-            if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
+            if (e.target.closest("#boton-hogar")) {
+                mostrarPanel(panelHogar);
+                cambiarIconos("hogar");
+            }
+            if (e.target.closest("#boton-matches")) {
+                mostrarPanel(panelMatches);
+                cambiarIconos("matches");
+            }
+            if (e.target.closest("#boton-perfil")) {
+                mostrarPanel(panelPerfil);
+                cambiarIconos("perfil");
+            }
+
             // Botón "Editar perfil"
-            if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
-            if (e.target.closest("#btn-volver-perfil")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
+            if (e.target.closest("#btn-editar-perfil")) {
+                mostrarPanel(editarPerfil);
+                footerPrincipal.classList.add("oculto");
+                headerPrincipal.classList.add("oculto");
+            }
+
             // Botón "Volver" desde la edición de perfil
+            if (e.target.closest("#btn-volver")) {
+                mostrarPanel(panelPerfil);
+                editarPerfil.classList.add("oculto");
+                footerPrincipal.classList.remove("oculto");
+                headerPrincipal.classList.remove("oculto");
+            }
+
             // Botón like / dislike (mueven la tarjeta hacia un lado)
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
+
             // Click en el área de tarjetas (para cambiar de foto dentro del carrusel)
             if (e.target.closest(".contenedorSwipe")) {
                 const card = e.target.closest(".tarjeta");
@@ -595,14 +649,15 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarFotoPerfil();
         actualizarFotoPerfil();
         cargarTarjetasUsuarios(idUsuario);
+        cargarMatches();
 
         // =====================================================
-        //  LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
+        // LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
         // =====================================================
 
+        const UMBRAL = 150;  // Distancia en X a partir de la cual se considera un swipe
+        const limiteY = 25;  // Movimiento máximo vertical permitido
 
-        const UMBRAL = 150; // Distancia en X a partir de la cual se considera un swipe
-        const limiteY = 25;// Movimiento máximo vertical permitido
         let arrastrando = false;
         let inicioX = 0, inicioY = 0;
         let deltaInicialX = null;
@@ -812,51 +867,30 @@ document.addEventListener("DOMContentLoaded", e => {
          * Mueve la tarjeta top directamente hacia un lado,
          * se usa cuando el usuario pulsa los botones like/dislike.
          */
-        function moverTarjeta(direccion) {
+        async function moverTarjeta(direccion) {
             const cardTop = document.querySelector(".card-top");
             if (!cardTop) return;
+
+            const idUsuarioActual = localStorage.getItem("idUsuario");
+            const idUsuarioTarjeta = cardTop.dataset.idUsuario;
+            const esLike = direccion > 0; // Like si es +1, Dislike si es -1
+
+            // Registrar el swipe en BD ANTES de mover la tarjeta
+            await registrarSwipe(idUsuarioActual, idUsuarioTarjeta, esLike);
+
             cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
             cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
-            setTimeout(() => { cardTop.remove(); promoverTarjetas(); }, 420);
+
+            setTimeout(() => {
+                cardTop.remove();
+                promoverTarjetas();
+            }, 420);
+
             const next = document.querySelector(".card-next");
-            if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
-        }
-
-        const textarea = document.getElementById("descripcion");
-        const contador = document.getElementById("contador");
-
-        textarea.addEventListener("input", () => {
-            const longitud = textarea.value.length;
-            const max = textarea.getAttribute("maxlength");
-            contador.textContent = `${longitud} / ${max}`;
-        });
-
-        // Enviar descripción al backend
-        async function enviarDescripcion() {
-            const idUsuario = localStorage.getItem("idUsuario");
-            const descripcion = textarea.value.trim();
-
-            if (!idUsuario) return;
-
-            try {
-                const response = await fetch(`http://localhost:8090/api/usuarios/descripcion/${idUsuario}`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ descripcion })
-                });
-
-                if (!response.ok) throw new Error("Error al guardar la descripción");
-
-                console.log("Descripción enviada con éxito");
-            } catch (err) {
-                console.error("Error al enviar descripción:", err);
+            if (next) {
+                next.style.transition = "transform .3s ease";
+                next.style.transform = "scale(0.92) translateY(25px)";
             }
         }
-
-        // Opcional: enviar cuando se pierde el foco
-        textarea.addEventListener("blur", enviarDescripcion);
-
-    };
+    }
 });
