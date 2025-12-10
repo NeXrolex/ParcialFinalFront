@@ -594,7 +594,7 @@ document.addEventListener("DOMContentLoaded", e => {
             }
 
             // Botón "Volver" desde la edición de perfil
-            if (e.target.closest("#btn-volver")) {
+            if (e.target.closest("#btn-volver-perfil")) {
                 mostrarPanel(panelPerfil);
                 editarPerfil.classList.add("oculto");
                 footerPrincipal.classList.remove("oculto");
