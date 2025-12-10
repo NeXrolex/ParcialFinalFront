@@ -851,13 +851,14 @@
  }
 
  #datos-descripcion p {
-    margin-bottom: 15px;
+     margin-bottom: 15px;
  }
 
  #contenedor-textarea {
-    position: relative; /* necesario para el posicionamiento absoluto del contador */
-    width: 100vw;
-}
+     position: relative;
+     /* necesario para el posicionamiento absoluto del contador */
+     width: 100vw;
+ }
 
  #datos-descripcion textarea {
      justify-self: center;
@@ -883,6 +884,13 @@
      /* para que no interfiera al escribir */
  }
 
+ #aviso-cantidad-tarjetas {
+     margin: 0;
+     text-align: center;
+     color: white;
+     font-weight: bold;
+     font-size: 25px;
+ }
 
  .oculto {
      display: none;

@@ -872,10 +872,13 @@ document.addEventListener("DOMContentLoaded", e => {
 
             const idUsuarioActual = localStorage.getItem("idUsuario");
             const idUsuarioTarjeta = cardTop.dataset.idUsuario;
-            const esLike = direccion > 0; // Like si es +1, Dislike si es -1
+            const esLike = direccion > 0;
 
-            // Registrar el swipe en BD ANTES de mover la tarjeta
+            // Registrar el swipe en BD
             await registrarSwipe(idUsuarioActual, idUsuarioTarjeta, esLike);
+
+            // Eliminar usuario del array local para que no vuelva a aparecer
+            usuarios = usuarios.filter(u => u.id != idUsuarioTarjeta);
 
             cardTop.style.transition = "transform .45s cubic-bezier(.22,.9,.39,1)";
             cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
@@ -890,7 +893,13 @@ document.addEventListener("DOMContentLoaded", e => {
                 next.style.transition = "transform .3s ease";
                 next.style.transform = "scale(0.92) translateY(25px)";
             }
+
+            // Si ya no hay más usuarios, mostrar mensaje
+            if (usuarios.length === 0) {
+                contenedorSwipe.innerHTML = "<p id='aviso-cantidad-tarjetas'>¡No hay más usuarios! </p>";
+            }
         }
-        
+
+
     }
 });
