@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", e => {
         });
     };
 
-<<<<<<< HEAD
     function calcularEdad(fechaNacimiento) {
         const hoy = new Date();
         const nacimiento = new Date(fechaNacimiento);
@@ -35,11 +34,6 @@ document.addEventListener("DOMContentLoaded", e => {
         return edad;
     }
 
-=======
-    // =========================================================
-    //  SECCIÓN: PÁGINA REGISTRO
-    // =========================================================
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
     if (document.body.classList.contains("registro")) {
 
         // Botón de envío del formulario de registro
@@ -82,14 +76,9 @@ document.addEventListener("DOMContentLoaded", e => {
                 return;
             }
 
-<<<<<<< HEAD
             const edadForm = calcularEdad(fechaNacimiento);
 
             if (edadForm < 18 || edadForm > 120) {
-=======
-            // Validación de rango de edad permitido
-            if (edad < 18 || edad > 120) {
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
                 alert("La edad debe estar entre 18 y 120 años.");
                 return;
             }
@@ -171,13 +160,8 @@ document.addEventListener("DOMContentLoaded", e => {
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
-<<<<<<< HEAD
                 const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${encodeURIComponent(correoLogin)}`);
 
-=======
-                // Petición al backend para obtener usuario por correo
-                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${correoLogin}`);
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
@@ -253,21 +237,7 @@ document.addEventListener("DOMContentLoaded", e => {
         // FUNCIONES
         // ===================
 
-<<<<<<< HEAD
         // ---- Perfil ----
-=======
-        /**
-         * Calcula edad a partir de una fecha de nacimiento YYYY-MM-DD.
-         */
-        function calcularEdad(fechaNacimiento) {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const m = hoy.getMonth() - nacimiento.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-            return edad;
-        }
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
 
         /**
          * Muestra en el panel de perfil algo como: "Alex, 20."
@@ -369,6 +339,33 @@ document.addEventListener("DOMContentLoaded", e => {
                 }
             });
         }
+        // ajusta el swipe del back
+        async function registrarSwipe(idReceptor, direccion) {
+            const idEmisor = localStorage.getItem("idUsuario");
+
+            // Definir el tipo de swipe según la dirección
+            // Asumiremos: 1 = Like, 2 = Dislike (o usa la lógica que definiste en tu backend)
+            const tipoSwipe = (direccion > 0) ? 1 : 2;
+
+            const swipeData = {
+                idEmisor: parseInt(idEmisor),
+                idReceptor: parseInt(idReceptor),
+                tipo: tipoSwipe
+                // fechaHora se pone automático en el backend según tu código Java anterior
+            };
+
+            try {
+                // Asegúrate que el puerto (8090 o 8080) sea el correcto
+                await fetch("http://localhost:8090/api/swipe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(swipeData)
+                });
+                console.log(`Swipe enviado: ${tipoSwipe === 1 ? 'Like' : 'Dislike'} a usuario ${idReceptor}`);
+            } catch (error) {
+                console.error("Error enviando swipe:", error);
+            }
+        }
 
         /**
          * Carga la foto principal del botón circular de perfil
@@ -414,21 +411,8 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
-<<<<<<< HEAD
         // ---- Tarjetas ----
         async function cargarTarjetasUsuarios(idUsuario) {
-=======
-        // =====================================================
-        //  TARJETAS DE USUARIOS PARA SWIPE
-        // =====================================================
-
-        /**
-         * Pide al backend la lista de usuarios distintos al actual
-         * y genera tarjetas (div.tarjeta) para cada uno.
-         * También calcula la distancia entre usuarios usando la lat/lon.
-         */
-        async function cargarTarjetasUsuarios(idUsuarioActual) {
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             try {
                 const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuario}`);
                 usuarios = await res.json();
@@ -582,13 +566,7 @@ document.addEventListener("DOMContentLoaded", e => {
             if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
             // Botón "Editar perfil"
             if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
-<<<<<<< HEAD
             if (e.target.closest("#btn-volver-perfil")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
-=======
-            // Botón "Volver" desde la edición de perfil
-            if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
-            // Botón like / dislike (mueven la tarjeta hacia un lado)
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
             // Click en el área de tarjetas (para cambiar de foto dentro del carrusel)
@@ -797,6 +775,8 @@ document.addEventListener("DOMContentLoaded", e => {
             if (movXGlobal > UMBRAL) direccion = 1;
             if (movXGlobal < -UMBRAL) direccion = -1;
             if (direccion !== 0) {
+                const idReceptor = cardTop.dataset.idUsuario; // Obtenemos el ID guardado en el dataset
+                registrarSwipe(idReceptor, direccion);
                 // La tarjeta se va hacia la derecha (like) o izquierda (dislike)
                 cardTop.style.transform = `translate(${direccion * window.innerWidth * 1.2}px, 0px) rotate(${direccion * -30}deg)`;
                 setTimeout(() => {
