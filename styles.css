@@ -203,6 +203,21 @@
 
  }
 
+ #btn-login-volver-index,
+ #btn-registro-volver-index {
+    position: absolute;
+    left: 10px;
+    top: 15px;
+    border: none;
+    width: 30px;
+    height: 30px;
+    background: #0B0B0D;
+ }
+
+ #btn-login-volver-index:hover,
+ #btn-registro-volver-index:hover {
+    transform: scale(1.2);
+ }
  .headerLogin h1 {
      display: flex;
      align-items: center;
@@ -342,12 +357,12 @@
      width: 100%;
  }
 
- #datos-tarjeta h2{ 
-    margin: 5px;
+ #datos-tarjeta h2 {
+     margin: 5px;
  }
 
- #datos-tarjeta p{ 
-    margin: 4px;
+ #datos-tarjeta p {
+     margin: 4px;
  }
 
  .tarjeta::after {
