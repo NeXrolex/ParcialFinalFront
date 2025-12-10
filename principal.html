@@ -12,7 +12,7 @@
         <!-- Icono que aparece en la pestaña del navegador -->
     </head>
     <body class="principal">
-        <header class="headerPrincipal">
+        <header class="headerPrincipal oculto">
             <h1>
                 <img src="imgs/iconoapp.png" alt="icono de tinder">
                 <!-- Logo de la app -->
@@ -23,13 +23,12 @@
             </button>
         </header>
         <!-- SECCIÓN HOGAR (pantalla principal de swipes) -->
-        <div class="hogar">
+        <div class="hogar oculto">
             <!-- Contenedor de las tarjetas para hacer swipe -->
             <div class="contenedorSwipe">
                 <div class="tarjeta card-top"></div>
                 <div class="tarjeta card-next"></div>
             </div>
-
             <!-- Botones de swipe: dislike, superlike, like -->
             <div class="contenedorBotonesSwap">
                 <button class="botonesMatch" id="btn-dislike">
@@ -57,7 +56,7 @@
                 <!-- Contenedor de perfiles que te han dado like / tus matches -->
                 <div id="likes">
                     <div class="perfilesLike" id="div-likes"></div>
-                     <!-- aquí JS puede meter tarjetas de "likes" -->
+                    <!-- aquí JS puede meter tarjetas de "likes" -->
                     <div class="perfilesLike" id="div-matches"></div>
                     <div class="perfilesLike" id="div-matches"></div>
                 </div>
@@ -72,7 +71,7 @@
             <div class="panelPerfil">
                 <button id="btn-foto-perfil">
                     <img src="">
-                     <!-- la src se llenará con JS con la foto del usuario -->
+                    <!-- la src se llenará con JS con la foto del usuario -->
                 </button>
                 <p id="nombre-edad-perfil">Nombre, edad.</p>
                 <button id="btn-editar-perfil">
@@ -82,7 +81,7 @@
             </div>
         </div>
         <!-- SECCIÓN EDITAR PERFIL (panel para cambiar datos y fotos) -->
-        <section class="contenedorEditarPerfil ocultar">
+        <section class="contenedorEditarPerfil ">
             <div id="header-editar">
                 <button id="btn-volver-perfil">
                     <img src="imgs/iconovolver.png">
@@ -160,10 +159,18 @@
                         <img class="eliminar-foto" src="imgs/x-icon.png">
                     </div>
                 </div>
+                <div id="datos-descripcion">
+                    <h1>Sobre mí</h1>
+                    <p>Cuentale al mundo un poco sobre tí.</p>
+                    <div id="contenedor-textarea">
+                        <textarea id="descripcion" maxlength="400" placeholder="Escribe aquí..."></textarea>
+                        <div id="contador">0 / 400</div>
+                    </div>
+                </div>
             </div>
         </section>
         <!-- FOOTER (barra de navegación inferior) -->
-        <footer class="footerPrincipal">
+        <footer class="footerPrincipal oculto">
             <div class="contenedorBotonesFooter">
                 <button class="botonesPrincipal" id="boton-hogar">
                     <!-- Botón para ir a la pantalla de swipes (hogar) -->
