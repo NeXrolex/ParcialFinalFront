@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <!-- Codificación de caracteres. UTF-8 permite ñ, tildes, símbolos, etc. -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Hace que la página se vea bien en celulares (diseño responsive) -->
+        <title>Tinder - Registro</title>
+        <!-- Título que aparece en la pestaña del navegador -->
+        <link href="styles.css" rel="stylesheet">
+        <!-- Enlazamos la hoja de estilos donde está todo el diseño visual -->
+        <link rel="icon" type="image/png" href="imgs/iconoapp.png">
+        <!-- Icono pequeño (favicon) que se ve en la pestaña del navegador -->
+    </head>
+    <body class="registro">
+        <!-- class="registro" permite aplicar estilos específicos a esta pantalla -->
+
+
+        <!-- ENCABEZADO DE LA PÁGINA DE REGISTRO -->
+        <header class="headerRegistro">
+            <h1>
+                <!-- Título principal: logo + nombre de la app -->
+                <img src="imgs/tinderblanco.png" alt="icono de tinder">
+                tinder
+            </h1>
+            <h2>¿Podemos conocerte?</h2>
+            <!-- Subtítulo de bienvenida al formulario de registro -->
+            <p>
+                Completa todos los campos con información correcta. Podrás actualizar tus datos más adelante.
+                <br><br>
+                (Todos los campos deben ser diligenciados.)
+            </p>
+            <!-- Texto explicativo para el usuario -->
+        </header>
+
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <form class="formRegistro">
+            <!-- class="formRegistro" se usará en CSS para el estilo del formulario -->
+
+
+            <!-- Campo: Nombre -->
+            <label for="nombre-registro">Nombre</label>
+            <!-- for="nombre-registro" enlaza el label con el input de abajo -->
+            <input
+                type="text"
+                id="nombre-registro"
+                name="nombre-registro"
+                placeholder="Ingresa tu nombre"
+                required
+            >
+            <!--
+                type="text"     → texto normal
+                id / name       → identificadores para JS y para envío de datos
+                placeholder     → texto de ayuda dentro del campo
+                required        → obliga a llenar el campo
+            -->
+
+
+            <!-- Campo: Apellido -->
+            <label for="apellido-registro">Apellido</label>
+            <input
+                type="text"
+                id="apellido-registro"
+                name="apellido-registro"
+                placeholder="Ingresa tu apellido"
+                required
+            >
+
+            <!-- Campo: Correo -->
+            <label for="correo-registro">Correo</label>
+            <input
+                type="email"
+                id="correo-registro"
+                name="correo-registro"
+                placeholder="Ingresa tu correo"
+                required
+            >
+            <!-- type="email" hace validación básica de formato de correo en el navegador -->
+
+
+            <!-- Campo: Contraseña -->
+            <label for="password-registro">Contraseña</label>
+            <input
+                type="password"
+                id="password-registro"
+                name="password-registro"
+                placeholder="Ingresa tu contraseña"
+                required
+            >
+            <!-- type="password" oculta los caracteres mientras se escribe -->
+
+            <!-- Campo: Fecha de nacimiento -->
+            <label for="fecha-nacimiento-registro">¿Cuándo naciste?</label>
+            <input
+                type="date"
+                id="fecha-nacimiento-registro"
+                name="fecha-nacimiento-registro"
+                required
+            >
+            <!-- type="date" muestra un selector de fecha nativo del navegador -->
+
+
+            <!-- Campo: Género -->
+            <label for="genero-registro">Género</label>
+            <select id="genero-registro" class="seleccionarGenero" required>
+                <!--
+                    <select> crea una lista desplegable.
+                    required obliga a seleccionar una opción válida (no la vacía).
+                -->
+
+
+                <option value="" disabled selected>Selecciona tu género</option>
+                <!--
+                    Opción inicial deshabilitada, funciona como "placeholder"
+                    value="" hace que no sea una opción válida para enviar
+                -->
+                <option value="M">Hombre</option>
+                <option value="F">Mujer</option>
+                <option value="O">Otro</option>
+            </select>
+
+
+            <!-- Botón para enviar el formulario de registro -->
+            <button type="button" id="boton-enviar-registro">Crear cuenta</button>
+            <!--
+                type="button" → el formulario NO se enviará automáticamente.
+                En tu script.js interceptas el click y haces un fetch
+                a la API de tu backend en vez de recargar la página.
+            -->
+        </form>
+        
+        <!-- Archivo JavaScript con la lógica del registro:
+             - Capturar los valores del formulario
+             - Validar reglas adicionales
+             - Enviar los datos al backend (API REST) usando fetch
+             - Manejar la respuesta (exitoso, error, etc.) -->
+        <script src="script.js"></script>
+    </body>
+</html>

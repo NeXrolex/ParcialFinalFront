@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Hace que se vea bien en pantallas pequeñas (móviles) -->
+        <title>Tinder - Principal</title>
+        <!-- Título en la pestaña del navegador -->
+        <link href="styles.css" rel="stylesheet">
+        <!-- Hoja de estilos con todo el diseño de la página -->
+        <link rel="icon" type="image/png" href="imgs/iconoapp.png">
+        <!-- Icono que aparece en la pestaña del navegador -->
+    </head>
+    <body class="principal">
+        <header class="headerPrincipal">
+            <h1>
+                <img src="imgs/iconoapp.png" alt="icono de tinder">
+                <!-- Logo de la app -->
+                tinder
+            </h1>
+            <button id="boton-cerrar-sesion">
+                Cerrar sesión
+            </button>
+        </header>
+        <!-- SECCIÓN HOGAR (pantalla principal de swipes) -->
+        <div class="hogar">
+            <!-- Contenedor de las tarjetas para hacer swipe -->
+            <div class="contenedorSwipe">
+                <div class="tarjeta card-top"></div>
+                <div class="tarjeta card-next"></div>
+            </div>
+
+            <!-- Botones de swipe: dislike, superlike, like -->
+            <div class="contenedorBotonesSwap">
+                <button class="botonesMatch" id="btn-dislike">
+                    <img src="imgs/iconoxroja.png" alt="icono de perfil">
+                    <br>
+                </button>
+                <button id="btn-superlike" class="botonesMatch">
+                    <img src="imgs/iconoestrella.png" alt="icono de perfil">
+                    <br>
+                </button>
+                <button class="botonesMatch" id="btn-like">
+                    <img src="imgs/iconocorazonverde.png" alt="icono de perfil">
+                    <br>
+                </button>
+            </div>
+        </div>
+        <!-- SECCIÓN MATCHES (lista de likes / matches) -->
+        <div class="matches oculto">
+            <div id="buscador">
+                <img src="imgs/iconolupa.png" alt="icono de lupa">
+                <input type="search" id="buscar-matches" placeholder="">
+            </div>
+            <div class="panelLikeMatch">
+                <p>Tus conexiones.</p>
+                <!-- Contenedor de perfiles que te han dado like / tus matches -->
+                <div id="likes">
+                    <div class="perfilesLike" id="div-likes"></div>
+                     <!-- aquí JS puede meter tarjetas de "likes" -->
+                    <div class="perfilesLike" id="div-matches"></div>
+                    <div class="perfilesLike" id="div-matches"></div>
+                </div>
+                <p>Personas a las que le has gustado.</p>
+                <div id="matches">
+                    <div class="perfilesLike" id="div-matches"></div>
+                </div>
+            </div>
+        </div>
+        <!-- SECCIÓN PERFIL (vista del perfil propio) -->
+        <div class="perfil oculto">
+            <div class="panelPerfil">
+                <button id="btn-foto-perfil">
+                    <img src="">
+                     <!-- la src se llenará con JS con la foto del usuario -->
+                </button>
+                <p id="nombre-edad-perfil">Nombre, edad.</p>
+                <button id="btn-editar-perfil">
+                    <img src="imgs/iconoeditar.png">
+                    Editar perfil
+                </button>
+            </div>
+        </div>
+        <!-- SECCIÓN EDITAR PERFIL (panel para cambiar datos y fotos) -->
+        <section class="contenedorEditarPerfil ocultar">
+            <div id="header-editar">
+                <button id="btn-volver-perfil">
+                    <img src="imgs/iconovolver.png">
+                    Editar perfil
+                    <!-- Botón para volver a la pantalla anterior -->
+                </button>
+                <div id="editar-preview">
+                    <button class="btnEditar" id="editar-datos">Editar</button>
+                    <button class="btnEditar" id="preview-datos">Vista previa</button>
+                </div>
+            </div>
+            <div id="datos-editar">
+                <h1>Media</h1>
+                <p>Agrega hasta 9 fotos.</p>
+                <div id="contenedor-agregar-fotos">
+                    <!-- Contenedor de los slots para subir fotos -->
+                    <div class="contenedorSubirFoto">
+                        <!-- Cada .contenedorSubirFoto es un “slot” para una foto -->
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <!-- icono para indicar que se puede subir foto -->
+                        <img class="preview">
+                        <!-- aquí JS pondrá la vista previa de la foto seleccionada -->
+                        <input type="file">
+                        <!-- input para seleccionar el archivo desde el PC/celular -->
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                        <!-- icono para eliminar esa foto -->
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <!-- Ocho slots más (para completar las 9 fotos máximas) -->
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                    <div class="contenedorSubirFoto">
+                        <img class="icono-subir" src="imgs/iconosubirfoto.png">
+                        <img class="preview">
+                        <input type="file">
+                        <img class="eliminar-foto" src="imgs/x-icon.png">
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- FOOTER (barra de navegación inferior) -->
+        <footer class="footerPrincipal">
+            <div class="contenedorBotonesFooter">
+                <button class="botonesPrincipal" id="boton-hogar">
+                    <!-- Botón para ir a la pantalla de swipes (hogar) -->
+                    <img src="imgs/iconotindercolor.png" alt="icono de tinder">
+                    <br>
+                    Hogar
+                </button>
+                <!-- Botón para ir a la sección de matches -->
+                <button class="botonesPrincipal" id="boton-matches">
+                    <img src="imgs/iconomatches.png" alt="icono de matches">
+                    <br>
+                    Matches
+                </button>
+                <!-- Botón para ir al perfil -->
+                <button class="botonesPrincipal" id="boton-perfil">
+                    <img src="imgs/iconoperfil.png" alt="icono de perfil">
+                    <br>
+                    Perfil
+                </button>
+            </div>
+        </footer>
+        <!-- Archivo JavaScript con TODA la lógica:
+             - mostrar/ocultar secciones (hogar/matches/perfil)
+             - manejar los botones de like/dislike/superlike
+             - cargar y previsualizar fotos
+             - llamar a la API REST con fetch -->
+        <script src="script.js"></script>
+    </body>
+</html>

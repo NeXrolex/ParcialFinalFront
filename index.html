@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!--
+            Meta que define la codificación de caracteres.
+            UTF-8 permite usar tildes, eñes y símbolos especiales.
+        -->
+        <meta charset="UTF-8">
+        <!--
+            Meta para que la página sea responsiva.
+            width=device-width: la anchura se adapta al dispositivo.
+            initial-scale=1.0: nivel de zoom inicial.
+        -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tinder</title>
+        <!-- Enlace al archivo de estilos CSS principal -->
+        <link href="styles.css" rel="stylesheet">
+        <!-- Icono que aparece en la pestaña -->
+        <link rel="icon" type="image/png" href="imgs/iconoapp.png">
+    </head>
+    <!--
+        class="index" permite aplicar estilos específicos a esta página
+        desde styles.css (por ejemplo, fondo, tipografías, etc.).
+    -->
+    <body class="index">
+        <header class="headerIndex">
+            <!--
+                Logo principal de la app.
+                El <img> muestra el icono y el texto "tinder" refuerza la marca.
+            -->
+            <h1 id="logo">
+                <img src="imgs/tinderblanco.png" alt="icono de tinder">
+                tinder
+            </h1>
+            <p>
+                <strong>Todo inicia</strong> con <br>
+                un <strong>gesto™</strong>
+            </p>
+        </header>
+        <div class="contenedorBotonesIndex">
+            <p>Al hacer click en crear una cuenta o iniciar sesión, aceptas nuestros terminos. <br> (No contamos con terminos aún).</p>
+            <!--
+                Botón para iniciar sesión.
+                También se manipula desde script.js usando su id.
+            -->
+            <button id="btn-crearcuenta-index"> Crear una cuenta</button>
+            <button id="btn-iniciarsesion-index">Iniciar sesión</button>
+            <!--
+                Texto para manejar casos de error en inicio de sesión.
+                Probablemente se usará para abrir ayuda o mostrar un mensaje.
+            -->
+            <p id="problemas-index">¿Problemas para iniciar sesión?</p>
+        </div>
+        <!--
+            Enlace al archivo JavaScript.
+            Aquí se programan los comportamientos:
+            - qué pasa al hacer click en los botones
+            - navegación a otras páginas
+            - validaciones, etc.
+        -->
+        <script src="script.js"></script>
+    </body>
+</html>
