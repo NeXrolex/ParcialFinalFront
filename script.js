@@ -129,6 +129,20 @@ document.addEventListener("DOMContentLoaded", e => {
 
                 // Convertir la respuesta a JSON (usuario creado con su id)
                 const data = await response.json();
+
+                try {
+                    await fetch(`http://localhost:8090/api/usuario/${data.id}/enviar-correo`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            asunto: "Bienvenido a TinderUD",
+                            contenido: `Hola ${data.nombre}, tu cuenta se ha creado correctamente.`
+                        })
+                    });
+                    console.log("Correo de confirmación enviado");
+                } catch (e) {
+                    console.error("Error enviando correo de confirmación:", e);
+                }
                 // Guardar datos importantes en localStorage para usarlos después
                 localStorage.setItem("idUsuario", data.id);
                 localStorage.setItem("nombre", data.nombre);
@@ -262,6 +276,152 @@ document.addEventListener("DOMContentLoaded", e => {
             if (!nombre || !fechaNacimiento) return;
             const edad = calcularEdad(fechaNacimiento);
             document.getElementById("nombre-edad-perfil").textContent = `${nombre}, ${edad}.`;
+        }
+
+        /**
+ * Registra un swipe en BD, detecta matches y crea seguidores
+ */
+        async function registrarSwipe(idEmisor, idReceptor, liked) {
+            try {
+                // 1. Registrar el swipe
+                const swipe = {
+                    idEmisor: idEmisor,
+                    idReceptor: idReceptor,
+                    liked: liked
+                };
+                const responseSwipe = await fetch("http://localhost:8090/api/swipe", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(swipe)
+                });
+
+                if (!responseSwipe.ok) {
+                    console.error("Error registrando swipe");
+                    return;
+                }
+
+                console.log("Swipe registrado correctamente");
+
+                // 2. Si es LIKE, buscar MATCH mutuo
+                if (liked) {
+                    // Obtener todos los swipes que el receptor ha hecho
+                    const swipesReceptorResponse = await fetch(
+                        `http://localhost:8090/api/swipe/emisor/${idReceptor}`
+                    );
+
+                    if (!swipesReceptorResponse.ok) {
+                        console.error("Error obteniendo swipes del receptor");
+                        return;
+                    }
+
+                    const listaSwipes = await swipesReceptorResponse.json();
+                    console.log(`Swipes del receptor ${idReceptor}:`, listaSwipes);
+
+                    // Buscar si el receptor también dio like al emisor
+                    const swipeMutuo = listaSwipes.find(
+                        s => s.idReceptor === idEmisor && s.liked === true
+                    );
+
+                    if (swipeMutuo) {
+                        console.log("¡MATCH DETECTADO! Ambos se dieron like");
+
+                        // 3. Verificar si el match ya existe para evitar duplicados
+                        const matchesExistentes = await fetch(
+                            `http://localhost:8090/api/match/usuario/${idEmisor}`
+                        );
+                        const listaMatches = await matchesExistentes.json();
+
+                        const matchYaExiste = listaMatches.find(
+                            m => (m.idUsuario1 === idEmisor && m.idUsuario2 === idReceptor) ||
+                                (m.idUsuario1 === idReceptor && m.idUsuario2 === idEmisor)
+                        );
+
+                        if (matchYaExiste) {
+                            console.log("El match ya existe, no se crea duplicado");
+                            return;
+                        }
+
+                        // 4. Crear el MATCH en BD
+                        const match = {
+                            idUsuario1: idEmisor,
+                            idUsuario2: idReceptor,
+                            fechaHora: new Date().toISOString(),
+                            estado: "ACTIVO"  //  IMPORTANTE: Especificar el estado
+                        };
+
+                        const responseMatch = await fetch("http://localhost:8090/api/match", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(match)
+                        });
+
+                        if (!responseMatch.ok) {
+                            const errorText = await responseMatch.text();
+                            console.error("Error creando match:", errorText);
+                            alert("Error al crear el match");
+                            return;
+                        }
+
+                        const matchCreado = await responseMatch.json();
+                        console.log("MATCH CREADO EXITOSAMENTE:", matchCreado);
+                        alert("🎉 ¡MATCH ENCONTRADO! 🎉");
+
+                        // 5. Crear SEGUIDORES BIDIRECCIONALES
+
+                        // Primer seguidor: idEmisor sigue a idReceptor
+                        const seg1 = {
+                            idSeguidor: idEmisor,
+                            idSeguido: idReceptor
+                        };
+                        const resSeg1 = await fetch("http://localhost:8090/api/seguidor", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(seg1)
+                        });
+
+                        if (resSeg1.ok) {
+                            console.log(`Seguidor creado: ${idEmisor} → ${idReceptor}`);
+                        }
+
+                        // Segundo seguidor: idReceptor sigue a idEmisor
+                        const seg2 = {
+                            idSeguidor: idReceptor,
+                            idSeguido: idEmisor
+                        };
+                        const resSeg2 = await fetch("http://localhost:8090/api/seguidor", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify(seg2)
+                        });
+
+                        if (resSeg2.ok) {
+                            console.log(`Seguidor creado: ${idReceptor} → ${idEmisor}`);
+                        }
+
+                        console.log("Todos los seguidores registrados correctamente");
+
+                        // 6. Recargar matches en la UI
+                        cargarMatches();
+
+                    } else {
+                        console.log("No hay match aún (receptor no dio like)");
+                    }
+                } else {
+                    console.log("Swipe negativo, no se busca match");
+                }
+
+            } catch (error) {
+                console.error("Error en registrarSwipe:", error);
+                alert("Error procesando el swipe: " + error.message);
+            }
         }
 
         /**
@@ -567,6 +727,76 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
+        /**
+         * Carga los matches actuales del usuario y los muestra en el panel
+         */
+        async function cargarMatches() {
+            try {
+                const res = await fetch(`http://localhost:8090/api/match/usuario/${idUsuario}`);
+
+                if (!res.ok) {
+                    console.error("Error cargando matches:", res.status);
+                    return;
+                }
+
+                const matches = await res.json();
+                const panelMatches = document.querySelector(".matches");
+
+                if (!panelMatches) return;
+
+                // Limpiar contenedor anterior
+                let contenedorMatches = panelMatches.querySelector(".contenedor-matches-list");
+                if (!contenedorMatches) {
+                    contenedorMatches = document.createElement("div");
+                    contenedorMatches.className = "contenedor-matches-list";
+                    panelMatches.innerHTML = "";
+                    panelMatches.appendChild(contenedorMatches);
+                }
+
+                if (matches.length === 0) {
+                    contenedorMatches.innerHTML = "<p style='text-align: center; margin-top: 20px;'>No hay matches aun</p>";
+                    return;
+                }
+
+                contenedorMatches.innerHTML = "";
+
+                matches.forEach(async (match) => {
+                    // Determinar cuál es el otro usuario
+                    const otroId = match.idUsuario1 === parseInt(idUsuario) ? match.idUsuario2 : match.idUsuario1;
+
+                    // Obtener datos del otro usuario
+                    try {
+                        const resOtro = await fetch(`http://localhost:8090/api/usuario/${otroId}`);
+                        const otroUsuario = await resOtro.json();
+
+                        // Crear tarjeta de match
+                        const tarjeta = document.createElement("div");
+                        tarjeta.className = "tarjeta-match";
+                        tarjeta.style.border = "1px solid #ddd";
+                        tarjeta.style.borderRadius = "8px";
+                        tarjeta.style.padding = "15px";
+                        tarjeta.style.marginBottom = "10px";
+                        tarjeta.style.backgroundColor = "#f9f9f9";
+
+                        const fechaMatch = new Date(match.fechaHora).toLocaleDateString();
+                        tarjeta.innerHTML = `
+                  <h4 style="margin: 0 0 10px 0;">${otroUsuario.nombre} ${otroUsuario.apellido}</h4>
+                  <p style="margin: 5px 0; color: #666;">Match desde: ${fechaMatch}</p>
+                  <p style="margin: 5px 0; color: #666;">${otroUsuario.edad} años - ${otroUsuario.ciudad}</p>
+                `;
+
+                        contenedorMatches.appendChild(tarjeta);
+                    } catch (err) {
+                        console.error("Error cargando usuario match:", err);
+                    }
+                });
+
+            } catch (error) {
+                console.error("Error en cargarMatches:", error);
+            }
+        }
+
+
         // =====================================================
         // EVENTOS GENERALES DE LA PANTALLA PRINCIPAL
         // =====================================================
@@ -649,6 +879,9 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarFotoPerfil();
         actualizarFotoPerfil();
         cargarTarjetasUsuarios(idUsuario);
+        cargarMatches();
+
+        
 
         // =====================================================
         // LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
