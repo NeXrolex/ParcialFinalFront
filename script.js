@@ -649,7 +649,6 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarFotoPerfil();
         actualizarFotoPerfil();
         cargarTarjetasUsuarios(idUsuario);
-        cargarMatches();
 
         // =====================================================
         // LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
@@ -665,7 +664,7 @@ document.addEventListener("DOMContentLoaded", e => {
 
         // Eventos para ratón y táctil
         contenedorSwipe.addEventListener("mousedown", iniciarArrastre);
-        contenedorSwipe.addEventListener("touchstart", iniciarArrastre, { passive: true });
+        contenedorSwipe.addEventListener("touchstart", iniciarArrastre);
 
         /**
          * Crea un elemento div.tarjeta con la información básica del usuario
@@ -892,5 +891,6 @@ document.addEventListener("DOMContentLoaded", e => {
                 next.style.transform = "scale(0.92) translateY(25px)";
             }
         }
+        
     }
 });
