@@ -1,6 +1,20 @@
 //Espera a que todo el html este cargado antes de iniciar l js
 document.addEventListener("DOMContentLoaded", e => {
 
+    avigator.geolocation.getCurrentPosition(
+        pos => {
+            console.log("Ubicación obtenida:", pos.coords);
+        },
+        err => {
+            switch (err.code) {
+                case 1: console.error("Permiso denegado"); break;
+                case 2: console.error("Posición no disponible"); break;
+                case 3: console.error("Timeout"); break;
+            }
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+    );
+
     // =========================================================
     //  SECCIÓN: PÁGINA INDEX (pantalla de inicio)
     // =========================================================
@@ -25,7 +39,6 @@ document.addEventListener("DOMContentLoaded", e => {
         });
     };
 
-<<<<<<< HEAD
     function calcularEdad(fechaNacimiento) {
         const hoy = new Date();
         const nacimiento = new Date(fechaNacimiento);
@@ -35,11 +48,6 @@ document.addEventListener("DOMContentLoaded", e => {
         return edad;
     }
 
-=======
-    // =========================================================
-    //  SECCIÓN: PÁGINA REGISTRO
-    // =========================================================
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
     if (document.body.classList.contains("registro")) {
 
         // Botón de envío del formulario de registro
@@ -82,14 +90,9 @@ document.addEventListener("DOMContentLoaded", e => {
                 return;
             }
 
-<<<<<<< HEAD
             const edadForm = calcularEdad(fechaNacimiento);
 
             if (edadForm < 18 || edadForm > 120) {
-=======
-            // Validación de rango de edad permitido
-            if (edad < 18 || edad > 120) {
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
                 alert("La edad debe estar entre 18 y 120 años.");
                 return;
             }
@@ -171,13 +174,8 @@ document.addEventListener("DOMContentLoaded", e => {
             const passwordLogin = document.getElementById("password-login").value;
 
             try {
-<<<<<<< HEAD
-                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${encodeURIComponent(correoLogin)}`);
-
-=======
                 // Petición al backend para obtener usuario por correo
-                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${correoLogin}`);
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
+                const respuesta = await fetch(`http://localhost:8090/api/usuario/correo/${encodeURIComponent(correoLogin)}`);
 
                 if (!respuesta.ok) {
                     alert("Usuario no encontrado");
@@ -252,22 +250,6 @@ document.addEventListener("DOMContentLoaded", e => {
         // ===================
         // FUNCIONES
         // ===================
-
-<<<<<<< HEAD
-        // ---- Perfil ----
-=======
-        /**
-         * Calcula edad a partir de una fecha de nacimiento YYYY-MM-DD.
-         */
-        function calcularEdad(fechaNacimiento) {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const m = hoy.getMonth() - nacimiento.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) edad--;
-            return edad;
-        }
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
 
         /**
          * Muestra en el panel de perfil algo como: "Alex, 20."
@@ -414,43 +396,27 @@ document.addEventListener("DOMContentLoaded", e => {
             }
         }
 
-<<<<<<< HEAD
         // ---- Tarjetas ----
         async function cargarTarjetasUsuarios(idUsuario) {
-=======
-        // =====================================================
-        //  TARJETAS DE USUARIOS PARA SWIPE
-        // =====================================================
-
-        /**
-         * Pide al backend la lista de usuarios distintos al actual
-         * y genera tarjetas (div.tarjeta) para cada uno.
-         * También calcula la distancia entre usuarios usando la lat/lon.
-         */
-        async function cargarTarjetasUsuarios(idUsuarioActual) {
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             try {
                 const res = await fetch(`http://localhost:8090/api/usuarios/otros/${idUsuario}`);
                 usuarios = await res.json();
 
-                const latA = parseFloat(localStorage.getItem("latActual"));
-                const lonA = parseFloat(localStorage.getItem("lonActual"));
+                const latLogueado = parseFloat(localStorage.getItem("latitud"));
+                const lonLogueado = parseFloat(localStorage.getItem("longitud"));
 
-                // Limpia el contenedor de swipe
                 contenedorSwipe.innerHTML = "";
 
                 usuarios.forEach((user, index) => {
-
-                    // Calcular distancia si el usuario tiene lat/lon guardados
-                    if (user.latitud != null && user.longitud != null) {
-                        user.distanciaKm = calcularDistancia(latA, lonA, user.latitud, user.longitud);
-                    } else {
-                        user.distanciaKm = null;
+                    // Calcular distancia si usuario logueado tiene ubicación
+                    let distanciaTexto = "Distancia desconocida";
+                    if (latLogueado && lonLogueado && user.latitud && user.longitud) {
+                        const dist = calcularDistancia(latLogueado, lonLogueado, user.latitud, user.longitud);
+                        distanciaTexto = `${dist.toFixed(1)} km`;
                     }
-                    // Crear la tarjeta para este usuario   
-                    const card = crearTarjeta(user);
 
-                    // Asignar clases según la posición (top, next, back)
+                    const card = crearTarjeta(user, distanciaTexto);
+
                     if (index === 0) card.classList.add("card-top");
                     else if (index === 1) {
                         card.classList.add("card-next");
@@ -460,7 +426,6 @@ document.addEventListener("DOMContentLoaded", e => {
                     contenedorSwipe.appendChild(card);
                 });
 
-                // Rellenar cada tarjeta con las fotos del usuario correspondiente
                 for (let i = 0; i < usuarios.length; i++) {
                     await llenarTarjetaUsuario(i);
                 }
@@ -468,6 +433,47 @@ document.addEventListener("DOMContentLoaded", e => {
                 console.error(e);
             }
         }
+
+
+        function actualizarUbicacionUsuario() {
+            const idUsuario = localStorage.getItem("idUsuario");
+            if (!idUsuario) return Promise.resolve();
+
+            if (!navigator.geolocation) {
+                console.error("Geolocalización no soportada");
+                return Promise.resolve();
+            }
+
+            return new Promise((resolve) => {
+                navigator.geolocation.getCurrentPosition(async pos => {
+                    const latitud = pos.coords.latitude;
+                    const longitud = pos.coords.longitude;
+
+                    localStorage.setItem("latitud", latitud);
+                    localStorage.setItem("longitud", longitud);
+
+                    try {
+                        const res = await fetch(`http://localhost:8090/api/usuarios/ubicacion/${idUsuario}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ latitud, longitud })
+                        });
+
+                        if (!res.ok) console.error("Error al actualizar ubicación");
+                        resolve();
+                    } catch (err) {
+                        console.error("Error enviando ubicación:", err);
+                        resolve();
+                    }
+                }, err => {
+                    console.error("Error al obtener ubicación:", err);
+                    resolve();
+                });
+            });
+        }
+
+
+
 
         /**
          * Para una posición dada en el array "usuarios", pide sus fotos
@@ -582,13 +588,9 @@ document.addEventListener("DOMContentLoaded", e => {
             if (e.target.closest("#boton-perfil")) { mostrarPanel(panelPerfil); cambiarIconos("perfil"); }
             // Botón "Editar perfil"
             if (e.target.closest("#btn-editar-perfil")) { mostrarPanel(editarPerfil); footerPrincipal.classList.add("oculto"); headerPrincipal.classList.add("oculto"); }
-<<<<<<< HEAD
             if (e.target.closest("#btn-volver-perfil")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
-=======
             // Botón "Volver" desde la edición de perfil
-            if (e.target.closest("#btn-volver")) { mostrarPanel(panelPerfil); editarPerfil.classList.add("oculto"); footerPrincipal.classList.remove("oculto"); headerPrincipal.classList.remove("oculto"); }
             // Botón like / dislike (mueven la tarjeta hacia un lado)
->>>>>>> 7d85fb60c189084e1bfc57e31987c80b129f49c7
             if (e.target.closest("#btn-like")) moverTarjeta(1);
             if (e.target.closest("#btn-dislike")) moverTarjeta(-1);
             // Click en el área de tarjetas (para cambiar de foto dentro del carrusel)
@@ -634,8 +636,12 @@ document.addEventListener("DOMContentLoaded", e => {
         cargarFotosUsuario(idUsuario);
         cargarFotoPerfil();
         actualizarFotoPerfil();
-        cargarTarjetasUsuarios(idUsuario);
-        obtenerUbicacionUsuarioActual();
+        // Primero actualizar la ubicación
+        // Primero actualizar la ubicación, luego cargar tarjetas
+        actualizarUbicacionUsuario().then(() => {
+            cargarTarjetasUsuarios(idUsuario);
+        });
+
 
         // =====================================================
         //  LÓGICA DE ARRASTRE (SWIPE) DE TARJETAS
@@ -657,7 +663,7 @@ document.addEventListener("DOMContentLoaded", e => {
          * Crea un elemento div.tarjeta con la información básica del usuario
          * (nombre, ciudad, distancia, fecha de unión).
          */
-        function crearTarjeta(user) {
+        function crearTarjeta(user, distanciaTexto) {
             const div = document.createElement("div");
             div.className = "tarjeta";
             div.dataset.indexFoto = 0;
@@ -672,14 +678,15 @@ document.addEventListener("DOMContentLoaded", e => {
             <img class="foto-activa"/>
         </div>
         <div id="datos-tarjeta">
-        <h2>${user.nombre}, ${calcularEdad(user.fechaNacimiento)}.</h2>
+            <h2>${user.nombre}, ${calcularEdad(user.fechaNacimiento)}.</h2>
             <p>Vive en ${user.ciudad}.</p>
-            <p>A ${user.distanciaKm} km de distancia.</p>
+            <p>${distanciaTexto}</p>
             <p>${fechaUnion}</p>
         </div>
     `;
             return div;
         }
+
 
         /**
          * Formatea la fecha de registro en un texto legible:
@@ -856,62 +863,5 @@ document.addEventListener("DOMContentLoaded", e => {
             const next = document.querySelector(".card-next");
             if (next) { next.style.transition = "transform .3s ease"; next.style.transform = "scale(0.92) translateY(25px)"; }
         }
-        // =====================================================
-        //  UBICACIÓN DEL USUARIO Y DISTANCIAS
-        // =====================================================
-
-        /**
-         * Obtiene la ubicación actual del usuario (lat/lon)
-         * y la guarda en localStorage y en el backend.
-         */
-        function obtenerUbicacionUsuarioActual() {
-            navigator.geolocation.getCurrentPosition(
-                pos => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-
-                    // Guardar localmente
-                    localStorage.setItem("latActual", lat);
-                    localStorage.setItem("lonActual", lon);
-
-                    const idUsuario = localStorage.getItem("idUsuario");
-                    enviarUbicacionBack(idUsuario, lat, lon);
-                },
-                err => console.error(err)
-            );
-        }
-
-        /**
-         * Envía al backend la ubicación actual del usuario logueado.
-         */
-        async function enviarUbicacionBack(idUsuario, lat, lon) {
-            await fetch(`http://localhost:8080/api/usuarios/ubicacion/${idUsuario}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ lat, lon })
-            });
-        }
-
-        /**
-         * Calcula la distancia entre dos puntos (lat1, lon1) y (lat2, lon2)
-         * usando la fórmula de Haversine. Devuelve kilómetros.
-         */
-        function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371; // radio de la Tierra en km
-
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-
-            const a =
-                Math.sin(dLat / 2) ** 2 +
-                Math.cos(lat1 * Math.PI / 180) *
-                Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLon / 2) ** 2;
-
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c; // distancia en km
-        }
-
     };
 });
